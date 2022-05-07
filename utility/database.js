@@ -1,10 +1,10 @@
 const sql = require("mssql");
 
 const config = {
-  user: "sqlserver",
+  user: "sa",
   password: "P@ssw0rd",
-  server: "35.193.76.67",
-  database: "jiera_config",
+  server: "172.18.128.51",
+  database: "WEB_CONFIG",
   options: {
     encrypt: false,
     trustServerCertificate: false,
