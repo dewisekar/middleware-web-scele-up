@@ -1,7 +1,8 @@
 const multer = require("multer");
 const fs = require("fs");
 
-var uploadDir = "./build";
+//var uploadDir = "./build";
+var uploadDir = "D:/APPLICATION/docs";
 
 var storage = multer.diskStorage({
   destination: uploadDir,
