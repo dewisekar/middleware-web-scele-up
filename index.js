@@ -1,7 +1,15 @@
 const express = require("express"); //Import the express dependency
 const app = express(); //Instantiate an express app, the main work horse of this server
 const port = 5000; //Save the port number where your server will be listening
-const { validateUsername, isExistDailyFile, insertDailyFile } = require("./routes/ValidateUsername");
+const {
+  validateUsername,
+  isExistDailyFile,
+  insertDailyFile,
+  GetDailyFile,
+  GetTop100JournalJualToday,
+  GetJournalJualByDate,
+  GetFormatJournalJual,
+} = require("./routes/ValidateUsername");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
 
@@ -45,6 +53,50 @@ app.post("/insertDailyFile", async (req, res) => {
   console.log("routes:/insertDailyFile");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/GetDailyFile", async (req, res) => {
+  let result = await GetDailyFile(req.body);
+  console.log("routes:/GetDailyFile");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/getJournalJualByDate", async (req, res) => {
+  let result = await GetJournalJualByDate(req.body);
+  console.log("routes:/getJournalJualByDate");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(
+    Date().toString("YYYY-MM-DD HH:mm:ss"),
+    "- res status:",
+    result.status
+  );
+  res.send(result);
+});
+
+app.get("/GetTop100JournalJualToday", async (req, res) => {
+  let result = await GetTop100JournalJualToday(req.body);
+  console.log("routes:/GetTop100JournalJualToday");
+  //console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(
+    Date().toString("YYYY-MM-DD HH:mm:ss"),
+    "- res status:",
+    result.status
+  );
+  res.send(result);
+});
+
+app.get("/getFormatJournalJual", async (req, res) => {
+  let result = await GetFormatJournalJual(req.body);
+  console.log("routes:/getFormatJournalJual");
+  //console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(
+    Date().toString("YYYY-MM-DD HH:mm:ss"),
+    "- res status:",
+    result.status
+  );
   res.send(result);
 });
 /*app.post("/uploadfile", upload.single("myFile"), (req, res, next) => {
