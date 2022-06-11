@@ -27,7 +27,12 @@ const validateUsername = async (req) => {
     //let myquery = "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" + username + "' AND COMPANY_ID ='" + companyId + "';";
     //const result = await pool.request().query(myquery);
 
-    const result = await pool.request().input("USERNAME", username).input("COMPANY_ID", companyId).input("PASSWORD", password).execute("SP_AuthorizeUsername");
+    const result = await pool
+      .request()
+      .input("USERNAME", username)
+      .input("COMPANY_ID", companyId)
+      .input("PASSWORD", password)
+      .execute("SP_AuthorizeUsername");
     //const result = await pool.request().input();
     //  let result = await pool.request().execute("SP_AuthorizeUsername");
     console.log(result.recordset);
@@ -58,13 +63,12 @@ const isExistDailyFile = async (req) => {
     let isMarketplace = req.IsMarketplace;
     const pool = await poolPromise;
 
-    //console.log(username);
-    //let myquery = "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" + username + "' AND COMPANY_ID ='" + companyId + "';";
-    //const result = await pool.request().query(myquery);
-
-    const result = await pool.request().input("FILENAME", filename).input("CHANNEL", channel).input("ISMARKETPLACE", isMarketplace).execute("SP_CheckExistDailyFile");
-    //const result = await pool.request().input();
-    //  let result = await pool.request().execute("SP_AuthorizeUsername");
+    const result = await pool
+      .request()
+      .input("FILENAME", filename)
+      .input("CHANNEL", channel)
+      .input("ISMARKETPLACE", isMarketplace)
+      .execute("SP_CheckExistDailyFile");
     console.log(result.recordset);
 
     if (typeof result.recordset !== "undefined") {
@@ -75,6 +79,58 @@ const isExistDailyFile = async (req) => {
       }
     }
 
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const GetJournalJualByDate = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let uploadDate = req.Date;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("UPLOADDATE", uploadDate)
+      .execute("SP_GetJournalJualByDate");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const GetDailyFile = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let uploadDate = req.Date;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("UPLOADDATE", uploadDate)
+      .execute("SP_GetDailyFileTrx");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+
     //console.log(resp);
     return resp;
     //res.json(result.recordset);
@@ -82,6 +138,46 @@ const isExistDailyFile = async (req) => {
     console.error(err);
     //res.status(500);
     //res.send(err.message);
+    return resp;
+  }
+};
+
+const GetTop100JournalJualToday = async () => {
+  let resp = { status: "false" };
+  try {
+    const pool = await poolPromise;
+
+    const result = await pool.request().execute("SP_GetTop100JournalJualToday");
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const GetFormatJournalJual = async () => {
+  let resp = { status: "false" };
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().execute("SP_GetFormatJournalJual");
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+    return resp;
+  } catch (err) {
+    console.error(err);
     return resp;
   }
 };
@@ -98,8 +194,20 @@ const insertDailyFile = async (req) => {
     //console.log(username);
     //let myquery = "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" + username + "' AND COMPANY_ID ='" + companyId + "';";
     //const result = await pool.request().query(myquery);
-
-    const result = await pool.request().input("FILENAME", filename).input("CHANNEL", channel).input("ISMARKETPLACE", isMarketplace).input("UPLOADDATE", uploadDate).execute("SP_InsertDailyFile");
+    // console.log(
+    //   "FILENAME:",
+    //   filename + ",CHANNEL:",
+    //   channel + ",ISMARKETPLACE:",
+    //   isMarketplace + ",UPLOADDATE:",
+    //   uploadDate
+    // );
+    const result = await pool
+      .request()
+      .input("FILENAME", filename)
+      .input("CHANNEL", channel)
+      .input("ISMARKETPLACE", isMarketplace)
+      .input("UPLOADDATE", uploadDate)
+      .execute("SP_InsertDailyFile");
     //const result = await pool.request().input();
     //  let result = await pool.request().execute("SP_AuthorizeUsername");
     console.log(result.recordset);
@@ -126,7 +234,12 @@ const insertDailyFile = async (req) => {
 
 const authorizeUsername = (req) => {
   try {
-    var query = "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" + req.username + "' AND COMPANY_ID ='" + req.companyId + "';";
+    var query =
+      "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" +
+      req.username +
+      "' AND COMPANY_ID ='" +
+      req.companyId +
+      "';";
     let result = execQuery(query);
     console.log(result);
   } catch (err) {
@@ -139,4 +252,8 @@ module.exports = {
   validateUsername,
   isExistDailyFile,
   insertDailyFile,
+  GetDailyFile,
+  GetTop100JournalJualToday,
+  GetJournalJualByDate,
+  GetFormatJournalJual,
 };
