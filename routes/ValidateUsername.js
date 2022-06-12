@@ -247,6 +247,39 @@ const authorizeUsername = (req) => {
   }
 };
 
+const CheckAndUpdateInvoiceForScan = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let invoice = req.Invoice;
+    let action = req.Action;
+    let date = req.Date;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("INVOICE", invoice)
+      .input("ACTION", action)
+      .input("DATECHECKED", date)
+      .execute("SP_CheckAndUpdateInvoice");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        if (result.recordset[0]["STATUS"] == "TRUE") {
+          resp.status = "true";
+          console.log("log aja");
+        } else {
+          resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+        }
+      }
+    }
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   authorizeUsername,
   validateUsername,
@@ -256,4 +289,5 @@ module.exports = {
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
+  CheckAndUpdateInvoiceForScan,
 };

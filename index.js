@@ -9,6 +9,7 @@ const {
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
+  CheckAndUpdateInvoiceForScan,
 } = require("./routes/ValidateUsername");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -123,6 +124,14 @@ app.post("/uploadfile", (req, res) => {
     console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", resp);
     res.send(resp);
   });
+});
+
+app.post("/checkAndUpdateInvoiceForScan", async (req, res) => {
+  let result = await CheckAndUpdateInvoiceForScan(req.body);
+  console.log("routes:/checkAndUpdateInvoiceForScan");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
 });
 //#region
 // app.post("/uploadFile", (req, res) => {
