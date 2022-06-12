@@ -31,6 +31,11 @@ app.get("/", (req, res) => {
   //the .sendFile method needs the absolute path to the file, see: https://expressjs.com/en/4x/api.html#res.sendFile
 });
 
+app.get("/downloadTenplate", function (req, res) {
+  const file = `${__dirname}/upload-folder/Template.xlsx`;
+  res.download(file); // Set disposition and send it.
+});
+
 //login authenticate
 app.post("/authenticateLogin", async (req, res) => {
   let result = await validateUsername(req.body);
