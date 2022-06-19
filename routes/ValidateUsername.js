@@ -280,6 +280,57 @@ const CheckAndUpdateInvoiceForScan = async (req) => {
   }
 };
 
+const GetKontrolPengirimanByDate = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let action = req.Action;
+    let date = req.Date;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("JENISDATA", action)
+      .input("UPLOADDATE", date)
+      .execute("SP_GetKontrolPengirimanByDate");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const GetFormatTableGeneral = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let action = req.Action;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("FORMAT", action)
+      .execute("SP_GetFormatTableGeneral");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
 module.exports = {
   authorizeUsername,
   validateUsername,
@@ -290,4 +341,6 @@ module.exports = {
   GetJournalJualByDate,
   GetFormatJournalJual,
   CheckAndUpdateInvoiceForScan,
+  GetKontrolPengirimanByDate,
+  GetFormatTableGeneral,
 };
