@@ -9,7 +9,7 @@ const {
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
-  CheckAndUpdateInvoiceForScan,
+  CheckAndUpdateResiForScan,
   GetKontrolPengirimanByDate,
   GetFormatTableGeneral,
 } = require("./routes/ValidateUsername");
@@ -128,9 +128,9 @@ app.post("/uploadfile", (req, res) => {
   });
 });
 
-app.post("/checkAndUpdateInvoiceForScan", async (req, res) => {
-  let result = await CheckAndUpdateInvoiceForScan(req.body);
-  console.log("routes:/checkAndUpdateInvoiceForScan");
+app.post("/checkAndUpdateResiForScan", async (req, res) => {
+  let result = await CheckAndUpdateResiForScan(req.body);
+  console.log("routes:/checkAndUpdateResiForScan");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);

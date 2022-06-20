@@ -247,7 +247,7 @@ const authorizeUsername = (req) => {
   }
 };
 
-const CheckAndUpdateInvoiceForScan = async (req) => {
+const CheckAndUpdateResiForScan = async (req) => {
   let resp = { status: "false" };
   try {
     let invoice = req.Invoice;
@@ -260,7 +260,7 @@ const CheckAndUpdateInvoiceForScan = async (req) => {
       .input("INVOICE", invoice)
       .input("ACTION", action)
       .input("DATECHECKED", date)
-      .execute("SP_CheckAndUpdateInvoice");
+      .execute("SP_CheckAndUpdateResi");
     console.log(result.recordset);
 
     if (typeof result.recordset !== "undefined") {
@@ -340,7 +340,7 @@ module.exports = {
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
-  CheckAndUpdateInvoiceForScan,
+  CheckAndUpdateResiForScan,
   GetKontrolPengirimanByDate,
   GetFormatTableGeneral,
 };
