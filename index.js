@@ -6,12 +6,15 @@ const {
   isExistDailyFile,
   insertDailyFile,
   GetDailyFile,
+  GetFileResi,
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
   CheckAndUpdateResiForScan,
   GetKontrolPengirimanByDate,
   GetFormatTableGeneral,
+  isExistFileResi,
+  insertDailyFileResi,
 } = require("./routes/ValidateUsername");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -56,6 +59,14 @@ app.post("/isExistDailyFile", async (req, res) => {
   res.send(result);
 });
 
+app.post("/isExistFileResi", async (req, res) => {
+  let result = await isExistFileResi(req.body);
+  console.log("routes:/isExistFileResi");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 app.post("/insertDailyFile", async (req, res) => {
   let result = await insertDailyFile(req.body);
   console.log("routes:/insertDailyFile");
@@ -64,9 +75,25 @@ app.post("/insertDailyFile", async (req, res) => {
   res.send(result);
 });
 
+app.post("/insertDailyFileResi", async (req, res) => {
+  let result = await insertDailyFileResi(req.body);
+  console.log("routes:/insertDailyFileResi");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 app.post("/GetDailyFile", async (req, res) => {
   let result = await GetDailyFile(req.body);
   console.log("routes:/GetDailyFile");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/getFileResi", async (req, res) => {
+  let result = await GetFileResi(req.body);
+  console.log("routes:/getFileResi");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);

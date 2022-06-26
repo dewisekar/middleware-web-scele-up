@@ -86,6 +86,37 @@ const isExistDailyFile = async (req) => {
   }
 };
 
+const isExistFileResi = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let filename = req.Filename;
+    let channel = req.Channel;
+    let isMarketplace = req.IsMarketplace;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("FILENAME", filename)
+      .input("CHANNEL", channel)
+      .input("ISMARKETPLACE", isMarketplace)
+      .execute("SP_CheckExistDailyFileResi");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length == 1) {
+        resp.status = "true";
+        resp.FILENAME = result.recordset[0].FILENAME;
+        resp.UPLOADDATE = result.recordset[0].UPLOADDATE;
+      }
+    }
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 const GetJournalJualByDate = async (req) => {
   let resp = { status: "false" };
   try {
@@ -122,6 +153,38 @@ const GetDailyFile = async (req) => {
       .request()
       .input("UPLOADDATE", uploadDate)
       .execute("SP_GetDailyFileTrx");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length >= 1) {
+        resp.status = "true";
+        resp.message = result.recordset;
+      }
+    }
+
+    //console.log(resp);
+    return resp;
+    //res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    //res.status(500);
+    //res.send(err.message);
+    return resp;
+  }
+};
+
+const GetFileResi = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let startDate = req.StartDate;
+    let endDate = req.EndDate;
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("STARTDATE", startDate)
+      .input("ENDDATE", endDate)
+      .execute("SP_GetFileResi");
     console.log(result.recordset);
 
     if (typeof result.recordset !== "undefined") {
@@ -232,6 +295,56 @@ const insertDailyFile = async (req) => {
   }
 };
 
+const insertDailyFileResi = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let filename = req.Filename;
+    let channel = req.Channel;
+    let isMarketplace = req.IsMarketplace;
+    let uploadDate = req.Date;
+    const pool = await poolPromise;
+
+    //console.log(username);
+    //let myquery = "SELECT TOP(1) * FROM dbo.USERS WITH(NOLOCK) WHERE USERNAME = '" + username + "' AND COMPANY_ID ='" + companyId + "';";
+    //const result = await pool.request().query(myquery);
+    // console.log(
+    //   "FILENAME:",
+    //   filename + ",CHANNEL:",
+    //   channel + ",ISMARKETPLACE:",
+    //   isMarketplace + ",UPLOADDATE:",
+    //   uploadDate
+    // );
+    const result = await pool
+      .request()
+      .input("FILENAME", filename)
+      .input("CHANNEL", channel)
+      .input("ISMARKETPLACE", isMarketplace)
+      .input("UPLOADDATE", uploadDate)
+      .execute("SP_InsertDailyFileResi");
+    //const result = await pool.request().input();
+    //  let result = await pool.request().execute("SP_AuthorizeUsername");
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length == 1) {
+        if ((result.recordset[0].STATUS = "1")) resp.status = "true";
+        else resp.status = "false";
+
+        resp.message = result.recordset[0].MESSAGE;
+      }
+    }
+
+    //console.log(resp);
+    return resp;
+    //res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    //res.status(500);
+    //res.send(err.message);
+    return resp;
+  }
+};
+
 const authorizeUsername = (req) => {
   try {
     var query =
@@ -283,14 +396,16 @@ const CheckAndUpdateResiForScan = async (req) => {
 const GetKontrolPengirimanByDate = async (req) => {
   let resp = { status: "false" };
   try {
+    let orderDate = req.OrderDate;
+    let processDate = req.ProcessDate;
     let action = req.Action;
-    let date = req.Date;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
       .input("JENISDATA", action)
-      .input("UPLOADDATE", date)
+      .input("ORDERDATE", orderDate)
+      .input("PROCESSDATE", processDate)
       .execute("SP_GetKontrolPengirimanByDate");
     console.log(result.recordset);
 
@@ -337,10 +452,13 @@ module.exports = {
   isExistDailyFile,
   insertDailyFile,
   GetDailyFile,
+  GetFileResi,
   GetTop100JournalJualToday,
   GetJournalJualByDate,
   GetFormatJournalJual,
   CheckAndUpdateResiForScan,
   GetKontrolPengirimanByDate,
   GetFormatTableGeneral,
+  isExistFileResi,
+  insertDailyFileResi,
 };
