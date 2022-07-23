@@ -146,12 +146,14 @@ const GetJournalJualByDate = async (req) => {
 const GetDailyFile = async (req) => {
   let resp = { status: "false" };
   try {
-    let uploadDate = req.Date;
+    let startDate = req.StartDate;
+    let endDate = req.EndDate;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("UPLOADDATE", uploadDate)
+      .input("STARTDATE", startDate)
+      .input("ENDDATE", endDate)
       .execute("SP_GetDailyFileTrx");
     console.log(result.recordset);
 
@@ -252,6 +254,7 @@ const insertDailyFile = async (req) => {
     let channel = req.Channel;
     let isMarketplace = req.IsMarketplace;
     let uploadDate = req.Date;
+    let totalRows = req.TotalRows;
     const pool = await poolPromise;
 
     //console.log(username);
@@ -270,6 +273,7 @@ const insertDailyFile = async (req) => {
       .input("CHANNEL", channel)
       .input("ISMARKETPLACE", isMarketplace)
       .input("UPLOADDATE", uploadDate)
+      .input("TOTALROWS", totalRows)
       .execute("SP_InsertDailyFile");
     //const result = await pool.request().input();
     //  let result = await pool.request().execute("SP_AuthorizeUsername");
@@ -396,16 +400,29 @@ const CheckAndUpdateResiForScan = async (req) => {
 const GetKontrolPengirimanByDate = async (req) => {
   let resp = { status: "false" };
   try {
-    let orderDate = req.OrderDate;
-    let processDate = req.ProcessDate;
+    let OdStart = req.OdStart;
+    let OdEnd = req.OdEnd;
+    let PdStart = req.PdStart;
+    let PdEnd = req.PdEnd;
+    let CheckByOd = req.CheckByOd;
+    let CheckByPd = req.CheckByPd;
     let action = req.Action;
+
+    console.log(OdStart,OdEnd,PdStart,PdEnd,CheckByOd,CheckByPd,action);
+    // let orderDate = req.OrderDate;
+    // let processDate = req.ProcessDate;
+    // let action = req.Action;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
+      .input("ORDERDATESTART", OdStart)
+      .input("ORDERDATEEND", OdEnd)
+      .input("PROCESSDATESTART", PdStart)
+      .input("PROCESSDATEEND", PdEnd)
+      .input("CHECKBYORDERDATE", CheckByOd)
+      .input("CHECKBYPROCESSDATE", CheckByPd)
       .input("JENISDATA", action)
-      .input("ORDERDATE", orderDate)
-      .input("PROCESSDATE", processDate)
       .execute("SP_GetKontrolPengirimanByDate");
     console.log(result.recordset);
 
