@@ -306,6 +306,7 @@ const insertDailyFileResi = async (req) => {
     let channel = req.Channel;
     let isMarketplace = req.IsMarketplace;
     let uploadDate = req.Date;
+    let totalPages = req.TotalPages;
     const pool = await poolPromise;
 
     //console.log(username);
@@ -324,6 +325,7 @@ const insertDailyFileResi = async (req) => {
       .input("CHANNEL", channel)
       .input("ISMARKETPLACE", isMarketplace)
       .input("UPLOADDATE", uploadDate)
+      .input("TOTALPAGES", totalPages)
       .execute("SP_InsertDailyFileResi");
     //const result = await pool.request().input();
     //  let result = await pool.request().execute("SP_AuthorizeUsername");

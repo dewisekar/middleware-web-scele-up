@@ -16,6 +16,8 @@ const {
   isExistFileResi,
   insertDailyFileResi,
 } = require("./routes/ValidateUsername");
+
+const { getRekapPengirimanByMonth } = require("./routes/Rekap");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
 
@@ -174,6 +176,14 @@ app.post("/getKontrolPengirimanByDate", async (req, res) => {
 app.post("/getFormatTableGeneral", async (req, res) => {
   let result = await GetFormatTableGeneral(req.body);
   console.log("routes:/getFormatTableGeneral");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/getRekapPengirimanByMonth", async (req, res) => {
+  let result = await getRekapPengirimanByMonth(req.body);
+  console.log("routes:/getRekapPengirimanByMonth");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
