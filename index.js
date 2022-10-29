@@ -18,6 +18,11 @@ const {
 } = require("./routes/ValidateUsername");
 
 const { getRekapPengirimanByMonth } = require("./routes/Rekap");
+const {
+  insertNewKOL,
+  GetFormatListKol,
+  GetListKol,
+} = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
 
@@ -184,6 +189,30 @@ app.post("/getFormatTableGeneral", async (req, res) => {
 app.post("/getRekapPengirimanByMonth", async (req, res) => {
   let result = await getRekapPengirimanByMonth(req.body);
   console.log("routes:/getRekapPengirimanByMonth");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/insertNewKOL", async (req, res) => {
+  let result = await insertNewKOL(req.body);
+  console.log("routes:/insertNewKOL");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getFormatListKol", async (req, res) => {
+  let result = await GetFormatListKol(req.body);
+  console.log("routes:/getFormatListKol");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getListKol", async (req, res) => {
+  let result = await GetListKol(req.body);
+  console.log("routes:/getListKol");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
