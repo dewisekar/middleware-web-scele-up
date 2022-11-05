@@ -22,6 +22,11 @@ const {
   insertNewKOL,
   GetFormatListKol,
   GetListKol,
+  GetALLKolName,
+  GetKolDetailByID,
+  GetSubMediaById,
+  insertNewKontrak,
+  GetListKontrak,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -203,7 +208,7 @@ app.post("/insertNewKOL", async (req, res) => {
 });
 
 app.get("/getFormatListKol", async (req, res) => {
-  let result = await GetFormatListKol(req.body);
+  let result = await GetFormatListKol("kol");
   console.log("routes:/getFormatListKol");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
@@ -213,6 +218,54 @@ app.get("/getFormatListKol", async (req, res) => {
 app.get("/getListKol", async (req, res) => {
   let result = await GetListKol(req.body);
   console.log("routes:/getListKol");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getALLKolName", async (req, res) => {
+  let result = await GetALLKolName();
+  console.log("routes:/getALLKolName");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getKolDetail", async (req, res) => {
+  let result = await GetKolDetailByID(req.query);
+  console.log("routes:/getKolDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getSubMediaById", async (req, res) => {
+  let result = await GetSubMediaById(req.query);
+  console.log("routes:/getSubMediaById");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/insertNewKontrak", async (req, res) => {
+  let result = await insertNewKontrak(req.body);
+  console.log("routes:/insertNewKontrak");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getFormatListKontrak", async (req, res) => {
+  let result = await GetFormatListKol("kontrak");
+  console.log("routes:/getFormatListKontrak");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getListKontrak", async (req, res) => {
+  let result = await GetListKontrak();
+  console.log("routes:/getListKontrak");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
