@@ -27,6 +27,13 @@ const {
   GetSubMediaById,
   insertNewKontrak,
   GetListKontrak,
+  insertNewBrief,
+  GetListBrief,
+  insertNewManager,
+  procToSendEmail,
+  GetListManager,
+  GetListKontrakIteration,
+  insertNewPost,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -270,6 +277,79 @@ app.get("/getListKontrak", async (req, res) => {
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
 });
+
+app.get("/getListKontrakIteration", async (req, res) => {
+  let result = await GetListKontrakIteration();
+  console.log("routes:/getListKontrakIteration");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/insertNewBrief", async (req, res) => {
+  let result = await insertNewBrief(req.body);
+  console.log("routes:/insertNewBrief");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getFormatListBrief", async (req, res) => {
+  let result = await GetFormatListKol("brief");
+  console.log("routes:/getFormatListKontrak");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getListBrief", async (req, res) => {
+  let result = await GetListBrief();
+  console.log("routes:/getListBrief");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/insertNewManager", async (req, res) => {
+  let result = await insertNewManager(req.body);
+  console.log("routes:/insertNewManager");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/sendEmail", async (req, res) => {
+  let result = await procToSendEmail(req.body);
+  console.log("routes:/sendEmail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getFormatList", async (req, res) => {
+  let result = await GetFormatListKol(req.query.menu);
+  console.log("routes:/getFormatList");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getListManager", async (req, res) => {
+  let result = await GetListManager();
+  console.log("routes:/getListManager");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/insertNewPost", async (req, res) => {
+  let result = await insertNewPost(req.body);
+  console.log("routes:/insertNewPost");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
