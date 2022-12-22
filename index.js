@@ -34,6 +34,11 @@ const {
   GetListManager,
   GetListKontrakIteration,
   insertNewPost,
+  sendMessageToQueue,
+  checkFileStatus,
+  ExecSPWithoutInput,
+  ExecSPWithInput,
+  UpdatePostStatsById,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -59,6 +64,14 @@ app.get("/", (req, res) => {
 app.get("/downloadTenplate", function (req, res) {
   const file = `${__dirname}/upload-folder/Template.xlsx`;
   res.download(file); // Set disposition and send it.
+});
+
+app.get("/downloadFile", function (req, res) {
+  console.log("routes:/downloadFile");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  // console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  //const file = `${__dirname}/upload-folder/Template.xlsx`;
+  res.download(req.query.file); // Set disposition and send it.
 });
 
 //login authenticate
@@ -259,6 +272,7 @@ app.post("/insertNewKontrak", async (req, res) => {
   console.log("routes:/insertNewKontrak");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  //res.download(result.filename);
   res.send(result);
 });
 
@@ -326,6 +340,14 @@ app.post("/sendEmail", async (req, res) => {
   res.send(result);
 });
 
+app.post("/sendQueue", async (req, res) => {
+  let result = await sendMessageToQueue(req.body);
+  console.log("routes:/sendQueue");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 app.get("/getFormatList", async (req, res) => {
   let result = await GetFormatListKol(req.query.menu);
   console.log("routes:/getFormatList");
@@ -342,6 +364,14 @@ app.get("/getListManager", async (req, res) => {
   res.send(result);
 });
 
+app.get("/checkFileStatus", async (req, res) => {
+  let result = await checkFileStatus(req.query);
+  console.log("routes:/checkFileStatus");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 app.post("/insertNewPost", async (req, res) => {
   let result = await insertNewPost(req.body);
   console.log("routes:/insertNewPost");
@@ -350,6 +380,29 @@ app.post("/insertNewPost", async (req, res) => {
   res.send(result);
 });
 
+app.post("/execSPWithoutInput", async (req, res) => {
+  let result = await ExecSPWithoutInput(req.body);
+  console.log("routes:/execSPWithoutInput");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/execSPWithInput", async (req, res) => {
+  let result = await ExecSPWithInput(req.body);
+  console.log("routes:/execSPWithInput");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.post("/updatePostStatsById", async (req, res) => {
+  let result = await UpdatePostStatsById(req.body);
+  console.log("routes:/updatePostStatsById");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
