@@ -666,54 +666,38 @@ const insertNewPost = async (req) => {
   let resp = { status: "false" };
   console.log("ini req", req)
   try {
-    let KontrakId = req.KontrakId;
-    let ManagerId = req.ManagerId;
-    let BriefId = req.BriefId;
-    let TglPostKontrak = req.TglPostKontrak;
-    let TglPostReal = req.TglPostReal;
-    let LinkPost = req.LinkPost;
-    let JumlahLike = req.JumlahLike;
-    let JumlahView = req.JumlahView;
-    let JumlahShare = req.JumlahShare;
-    let JumlahComment = req.JumlahComment;
-    let User = req.User;
+    const {KontrakId, ManagerId, BriefId, TglPostKontrak, User} = req;
     const pool = await poolPromise;
 
-    // const result = await pool
-    //   .request()
-    //   .input("KontrakId", KontrakId)
-    //   .input("ManagerId", ManagerId)
-    //   .input("BriefId", BriefId)
-    //   .input("TglPostKontrak", TglPostKontrak)
-    //   .input("TglPostReal", TglPostReal)
-    //   .input("LinkPost", LinkPost)
-    //   .input("JumlahLike", JumlahLike)
-    //   .input("JumlahView", JumlahView)
-    //   .input("JumlahShare", JumlahShare)
-    //   .input("JumlahComment", JumlahComment)
-    //   .input("User", User)
-    //   .execute("[MARKETING].[dbo].[SP_InsertNewPost]");
-    // console.log("[SP_InsertNewPost] result:", result.recordset);
+    const result = await pool
+      .request()
+      .input("KontrakId", KontrakId)
+      .input("ManagerId", ManagerId)
+      .input("BriefId", BriefId)
+      .input("TglPostKontrak", TglPostKontrak)
+      .input("User", User)
+      .execute("[MARKETING].[dbo].[SP_InsertNewPost]");
+    console.log("[SP_InsertNewPost] result:", result.recordset);
 
-    // if (typeof result.recordset !== "undefined") {
-    //   if (result.recordset.length == 1) {
-    //     if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-    //       if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-    //         let postId = result.recordset[0]["POST_ID"];
-    //         resp.postId = postId;
-    //         resp.status = "true";
-    //       } else {
-    //         resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
-    //       }
-    //     } else {
-    //       resp.message = "Unknown Error 3";
-    //     }
-    //   } else {
-    //     resp.message = "Unknown Error 2";
-    //   }
-    // } else {
-    //   resp.message = "Unknown Error 1";
-    // }
+    if (typeof result.recordset !== "undefined") {
+      if (result.recordset.length == 1) {
+        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
+          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
+            let postId = result.recordset[0]["POST_ID"];
+            resp.postId = postId;
+            resp.status = "true";
+          } else {
+            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+          }
+        } else {
+          resp.message = "Unknown Error 3";
+        }
+      } else {
+        resp.message = "Unknown Error 2";
+      }
+    } else {
+      resp.message = "Unknown Error 1";
+    }
 
     return resp;
   } catch (err) {
