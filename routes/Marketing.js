@@ -214,6 +214,28 @@ const GetKolDetailByID = async (req) => {
   }
 };
 
+const GetKontrakDetailByID = async (req) => {
+  let resp = { status: "false" };
+  try {
+    let id = req.Id;
+    const pool = await poolPromise;
+    const query = `select * from [MARKETING].[dbo].[Kol Kontrak] where [Kontrak Id] = ${id}`
+    const result = await pool
+      .request()
+      .query(query);
+    console.log(result.recordset);
+
+    const {recordset} = result;
+    resp.status = "true";
+    resp.message = recordset[0];
+    
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 const GetSubMediaById = async (req) => {
   let resp = { status: "false" };
   try {
@@ -437,6 +459,7 @@ const GetListKontrakIteration = async () => {
     if (typeof result.recordset !== "undefined") {
       if (result.recordset.length >= 1) {
         resp.status = "true";
+        console.log("halo", result.recordset)
         resp.message = result.recordset;
       }
     }
@@ -772,6 +795,7 @@ module.exports = {
   GetSubMediaById,
   insertNewKontrak,
   GetListKontrak,
+  GetKontrakDetailByID,
   insertNewBrief,
   GetListBrief,
   insertNewManager,

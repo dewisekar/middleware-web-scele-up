@@ -1,6 +1,6 @@
 const express = require("express"); //Import the express dependency
 const app = express(); //Instantiate an express app, the main work horse of this server
-const port = 6000; //Save the port number where your server will be listening
+const port = 5002; //Save the port number where your server will be listening
 const {
   validateUsername,
   isExistDailyFile,
@@ -39,6 +39,7 @@ const {
   ExecSPWithoutInput,
   ExecSPWithInput,
   UpdatePostStatsById,
+  GetKontrakDetailByID,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -296,6 +297,15 @@ app.get("/getListKontrakIteration", async (req, res) => {
   let result = await GetListKontrakIteration();
   console.log("routes:/getListKontrakIteration");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getKontrakDetail", async (req, res) => {
+  let result = await GetKontrakDetailByID(req.query);
+  console.log("ini query", req.query);
+  console.log("routes:/getKontrakDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
 });
