@@ -2,6 +2,7 @@ const { sql, execQuery, poolPromise } = require("../utility/database");
 const nodemailer = require("nodemailer");
 const { sendToTheQueue } = require("../utility/rabbitmq");
 const axios = require("axios");
+const { response } = require("express");
 
 const pythonUrl = "http://144.126.214.16:3131";
 const sendEmail = async (receiverEmail, subject, content) => {
@@ -780,6 +781,26 @@ const UpdatePostStatsById = async (req) => {
   }
 };
 
+const GetMissedPost = async (req) => {
+  let resp = { status: "false" };
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+    .request()
+    .execute("[MARKETING].[dbo].[SP_GetMissedPost]");
+    console.log(result.recordset);
+
+    const {recordset} = result;
+    resp.status = "true"
+    resp.message = recordset
+    
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -802,4 +823,5 @@ module.exports = {
   ExecSPWithoutInput,
   ExecSPWithInput,
   UpdatePostStatsById,
+  GetMissedPost
 };
