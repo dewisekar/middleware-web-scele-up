@@ -40,6 +40,7 @@ const {
   ExecSPWithInput,
   UpdatePostStatsById,
   GetKontrakDetailByID,
+  getPostDetail,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -410,6 +411,14 @@ app.post("/updatePostStatsById", async (req, res) => {
   let result = await UpdatePostStatsById(req.body);
   console.log("routes:/updatePostStatsById");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.body);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getPostDetail", async (req, res) => {
+  let result = await getPostDetail(req.query);
+  console.log("routes:/getPostDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
 });

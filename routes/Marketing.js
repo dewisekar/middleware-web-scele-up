@@ -781,6 +781,50 @@ const UpdatePostStatsById = async (req) => {
   }
 };
 
+const getPostDetail = async (req) => {
+  let resp = { status: "false" };
+  try {
+    const {id} = req;
+    const pool = await poolPromise;
+    const query = `SELECT 
+    a.[Tgl Post Sesuai Jadwal] as deadlineDate, 
+    a.[Tgl Post Real] as uploadDate,
+    a.[Post Id] as postId,
+    a.[Kontrak Id] as contractId,
+    a.[Link Post] as linkPost,
+    c.[Name] + ' (' + CONVERT(VARCHAR,d.[Kontrak Ke]) + ')' as contractName,
+    c.[Name] as kolName,
+    c.Platform as platform,
+    c.Username as username,
+    a.[Slot Ke] as  slotNumber,
+    e.[Tema] as briefName,
+    f.[Brief Code] as briefCode,
+    g.[Manager Name] as kolManager
+    FROM [MARKETING].dbo.Post a
+    JOIN [MARKETING].dbo.[Kol Kontrak] b WITH(NOLOCK) on a.[Kontrak Id] = b.[Kontrak Id]
+    JOIN [MARKETING].dbo.Kol c WITH(NOLOCK) on b.[Kol Id] = c.[Kol Id] 
+    JOIN [MARKETING].dbo.[Kol Kontrak Status] d WITH(NOLOCK) on d.[Kontrak Id] = a.[Kontrak Id] 
+    JOIN [MARKETING].dbo.Brief e WITH(NOLOCK) on a.[Brief Id] = e.[Brief Id] 
+    JOIN [MARKETING].dbo.[Brief Status] f WITH(NOLOCK) ON e.[Brief Id] = f.[Brief Id]
+    JOIN [MARKETING].dbo.[Kol Manager] g ON a.[Manager Id] = g.[Manager Id] 
+    WHERE a.[Post Id] = ${id}`
+    const result = await pool
+    .request()
+    .query(query);
+    console.log(result.recordset);
+
+
+    const {recordset} = result;
+    resp.status = "true";
+    resp.message = {...recordset[0]};
+    
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -803,4 +847,5 @@ module.exports = {
   ExecSPWithoutInput,
   ExecSPWithInput,
   UpdatePostStatsById,
+  getPostDetail
 };
