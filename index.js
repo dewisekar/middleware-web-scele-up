@@ -415,14 +415,6 @@ app.post("/updatePostStatsById", async (req, res) => {
   res.send(result);
 });
 
-app.get("/getMissedPost", async (req, res) => {
-  let result = await GetMissedPost();
-  console.log("routes:/getMissedPost");
-  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:");
-  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
-  res.send(result);
-});
-
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };

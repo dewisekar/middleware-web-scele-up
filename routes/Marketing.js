@@ -781,26 +781,6 @@ const UpdatePostStatsById = async (req) => {
   }
 };
 
-const GetMissedPost = async (req) => {
-  let resp = { status: "false" };
-  try {
-    const pool = await poolPromise;
-    const result = await pool
-    .request()
-    .execute("[MARKETING].[dbo].[SP_GetMissedPost]");
-    console.log(result.recordset);
-
-    const {recordset} = result;
-    resp.status = "true"
-    resp.message = recordset
-    
-    return resp;
-  } catch (err) {
-    console.error(err);
-    return resp;
-  }
-};
-
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
