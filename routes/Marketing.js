@@ -803,5 +803,4 @@ module.exports = {
   ExecSPWithoutInput,
   ExecSPWithInput,
   UpdatePostStatsById,
-  GetMissedPost
 };

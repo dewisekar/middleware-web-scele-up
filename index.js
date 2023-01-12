@@ -40,7 +40,6 @@ const {
   ExecSPWithInput,
   UpdatePostStatsById,
   GetKontrakDetailByID,
-  GetMissedPost,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
