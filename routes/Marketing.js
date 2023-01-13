@@ -796,7 +796,6 @@ const getPostDetail = async (req) => {
     .query(query);
     console.log(result.recordset);
 
-
     const {recordset} = result;
     resp.status = "true";
     resp.message = {...recordset[0]};
