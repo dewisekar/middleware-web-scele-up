@@ -803,6 +803,34 @@ const getPostDetail = async (req) => {
   }
 };
 
+const updatePostById = async (id, payload) => {
+  let resp = { status: "false" };
+  const {linkPost, deadlineDate, uploadDate} = payload
+  try {
+    const pool = await poolPromise;
+    const query = QUERIES.UPDATE_POST_QUERY
+    const result = await pool
+    .request()
+    .input("postId", id)
+    .input("linkPost", linkPost)
+    .input("deadlineDate", deadlineDate)
+    .input("uploadDate", uploadDate)
+    .query(query);
+    console.log(result);
+
+    const{rowsAffected} = result
+    if(rowsAffected[0]===1){
+      resp.status="true"
+    }
+    
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -825,5 +853,6 @@ module.exports = {
   ExecSPWithoutInput,
   ExecSPWithInput,
   UpdatePostStatsById,
-  getPostDetail
+  getPostDetail,
+  updatePostById
 };

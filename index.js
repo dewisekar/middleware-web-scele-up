@@ -41,6 +41,7 @@ const {
   UpdatePostStatsById,
   GetKontrakDetailByID,
   getPostDetail,
+  updatePostById,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -418,6 +419,16 @@ app.post("/updatePostStatsById", async (req, res) => {
 app.get("/getPostDetail", async (req, res) => {
   let result = await getPostDetail(req.query);
   console.log("routes:/getPostDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.patch("/updatePost", async (req, res) => {
+  const {query: {id}, body} = req
+  console.log("ini id", id, body)
+  let result = await updatePostById(id, body);
+  console.log("routes:/updatePost");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
