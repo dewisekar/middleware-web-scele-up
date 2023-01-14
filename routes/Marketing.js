@@ -311,7 +311,6 @@ const insertNewKontrak = async (req) => {
     let BookingSlot = req.BookingSlot;
     let BiayaKerjaSama = req.BiayaKerjaSama;
     let Manager = req.Manager;
-    // let FileMou = req.FileMou;
     let TanggalAwalKerjaSama = req.TanggalAwalKerjaSama;
     let TanggalAkhirKerjaSama = req.TanggalAkhirKerjaSama;
     let User = req.User;
@@ -326,7 +325,6 @@ const insertNewKontrak = async (req) => {
       .input("biayaKerjaSama", BiayaKerjaSama)
       .input("DP", DP)
       .input("manager", Manager)
-      // .input("fileMou", FileMou)
       .input("tanggalAwalKerjaSama", TanggalAwalKerjaSama)
       .input("tanggalAkhirKerjaSama", TanggalAkhirKerjaSama)
       .input("User", User)
@@ -421,11 +419,9 @@ const ExecSPWithoutInput = async (req) => {
     const pool = await poolPromise;
 
     const result = await pool.request().execute(SPName);
-    console.log(result.recordset);
-    if (result.recordset.length >= 1) {
-      resp.status = "true";
-      resp.message = result.recordset;
-    }
+    resp.status = "true";
+    resp.message = result.recordset;
+
     return resp;
   } catch (err) {
     console.error(err);
