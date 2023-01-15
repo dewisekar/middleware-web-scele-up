@@ -40,7 +40,12 @@ GET_UPLOADED_POST: `SELECT [Post Id] as postId,
     WHERE [Tgl Post Real] IS NOT NULL`,
 INSERT_NEW_LOG : `INSERT INTO MARKETING.dbo.Log_Marketing
     (Waktu, Query, [User], RESPONSE_MESSAGE)
-    VALUES(GETDATE(), @query, @user, @responseMessage);`
+    VALUES(GETDATE(), @query, @user, @responseMessage);`,
+GET_POST_STATISTIC_BY_POST_ID: `SELECT postId, followers, comments, 
+    likes, shares, views, id, dayNumber, createdAt
+    FROM MARKETING.dbo.Post_View
+    WHERE postId = @postId
+    ORDER BY dayNumber ASC;`
 }
 
 module.exports =  {QUERIES}

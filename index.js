@@ -44,6 +44,7 @@ const {
   getPostDetail,
   updatePostById,
   updatePostStatisticScheduler,
+  getPostStatisticByPostId,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -436,6 +437,16 @@ app.patch("/updatePost", async (req, res) => {
   res.send(result);
 });
 
+
+app.get("/getPostStatisticByPostId", async (req, res) => {
+  const {id} = req.query
+  let result = await getPostStatisticByPostId(id);
+  console.log("routes:/getPostStatisticByPostId");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
@@ -457,7 +468,7 @@ app.patch("/updatePost", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('* * 1 * * *', async () => {
+cron.schedule('* 1 * * *', async () => {
   console.log("Running scheduler to update post statistics")
   await updatePostStatisticScheduler()
 });

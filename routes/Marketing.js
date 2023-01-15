@@ -946,6 +946,27 @@ const updatePostStatisticScheduler = async () => {
   }
 };
 
+const getPostStatisticByPostId = async (postId) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("postId", postId)
+      .query(QUERIES.GET_POST_STATISTIC_BY_POST_ID);
+    console.log("halo", result.recordset)
+
+    const { recordset } = result;
+    resp.status = "true";
+    resp.message = recordset 
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -972,4 +993,5 @@ module.exports = {
   updatePostById,
   updatePostStatisticScheduler,
   _insertPostStatistic,
+  getPostStatisticByPostId
 };
