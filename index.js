@@ -43,7 +43,7 @@ const {
   GetKontrakDetailByID,
   getPostDetail,
   updatePostById,
-  updatePostStatisticScheduler
+  updatePostStatisticScheduler,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -457,7 +457,7 @@ app.patch("/updatePost", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('50 03 * * * *', async () => {
+cron.schedule('58 42 * * * *', async () => {
   console.log("Running scheduler to update post statistics")
   await updatePostStatisticScheduler()
 });

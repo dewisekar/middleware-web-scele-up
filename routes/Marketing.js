@@ -822,6 +822,66 @@ const updatePostById = async (id, payload) => {
   }
 };
 
+const _insertNewLog = async (payload) => {
+  try {
+    const { query, user, responseMessage } = payload;
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("query", query)
+      .input("user", user)
+      .input("responseMessage", responseMessage)
+      .query(QUERIES.INSERT_NEW_LOG);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const _insertPostStatistic = async (payload) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const {
+      postId,
+      followers,
+      likes,
+      views,
+      comments,
+      shares,
+      dateDifference,
+    } = payload;
+    const result = await pool
+      .request()
+      .input("postId", postId)
+      .input("followers", followers)
+      .input("likes", likes)
+      .input("views", views)
+      .input("comments", comments)
+      .input("shares", shares)
+      .input("dayNumber", dateDifference)
+      .execute("[MARKETING].[dbo].[SP_UpdatePostStatisticById]");
+
+    const { recordset, recordsets } = result;
+    const [{ RESPONSE_MESSAGE }] = recordset;
+
+    const logPayload = {
+      query: "INSERT INTO DBO.POST_VIEW FOR POST ID: " + postId,
+      responseMessage: RESPONSE_MESSAGE,
+      user: "",
+    };
+    await _insertNewLog(logPayload);
+
+    if (RESPONSE_MESSAGE === "SUCCESS") {
+      resp.status = "true";
+    }
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const updatePostStatisticScheduler = async () => {
   let resp = { status: "false" };
   const dayToFetch = [1, 3, 7, 14, 28];
@@ -874,7 +934,7 @@ const updatePostStatisticScheduler = async () => {
       })
     );
 
-    console.log("Ini post statistics", postsStatistics);
+    postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
 
     resp.status = "true";
     resp.message = { ...recordset[0] };
@@ -911,4 +971,5 @@ module.exports = {
   getPostDetail,
   updatePostById,
   updatePostStatisticScheduler,
+  _insertPostStatistic,
 };

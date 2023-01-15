@@ -37,7 +37,10 @@ GET_UPLOADED_POST: `SELECT [Post Id] as postId,
     [Slot Ke] as slotNumber, 
     DATEDIFF(day,[Tgl Post Real], GETDATE()) as dateDifference
     FROM MARKETING.dbo.Post
-    WHERE [Tgl Post Real] IS NOT NULL`
+    WHERE [Tgl Post Real] IS NOT NULL`,
+INSERT_NEW_LOG : `INSERT INTO MARKETING.dbo.Log_Marketing
+    (Waktu, Query, [User], RESPONSE_MESSAGE)
+    VALUES(GETDATE(), @query, @user, @responseMessage);`
 }
 
 module.exports =  {QUERIES}
