@@ -1,12 +1,12 @@
-const { sql, execQuery, poolPromise } = require("../utility/database");
-const nodemailer = require("nodemailer");
-const { sendToTheQueue } = require("../utility/rabbitmq");
 const axios = require("axios");
-const { response } = require("express");
+const nodemailer = require("nodemailer");
 
-const {QUERIES} = require("../queries/index")
+const { poolPromise } = require("../utility/database");
+const { sendToTheQueue } = require("../utility/rabbitmq");
+const { PYTHON_URL } = require("../config");
+const { QUERIES } = require("../queries/index");
+const PythonConnector = require("../connectors/PythonConnector");
 
-const pythonUrl = "http://144.126.214.16:3131";
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
   const transporter = nodemailer.createTransport({
@@ -144,7 +144,7 @@ const GetFormatListKol = async (menu) => {
   }
 };
 
-const GetListKol = async (req) => {
+const GetListKol = async () => {
   let resp = { status: "false" };
   try {
     const pool = await poolPromise;
@@ -222,26 +222,21 @@ const GetKontrakDetailByID = async (req) => {
   try {
     let id = req.Id;
     const pool = await poolPromise;
-    const query = QUERIES.GET_CONTRACT_DETAIL_QUERY
-    const result = await pool
-    .request()
-    .input("contractId", id)
-    .query(query);
+    const query = QUERIES.GET_CONTRACT_DETAIL_QUERY;
+    const result = await pool.request().input("contractId", id).query(query);
     console.log(result.recordset);
 
     const numberOfSlotQuery = `SELECT COUNT([MARKETING].dbo.Post.[Post Id]) as JumlahPost
-    FROM [MARKETING].dbo.Post WHERE [Kontrak Id] = ${id};`
-    const numberOfPostResult = await pool
-    .request()
-    .query(numberOfSlotQuery);
-    const {recordset: slotNumberRecordset} = numberOfPostResult;
-    const [{JumlahPost}] = slotNumberRecordset;
-    const postNumber = JumlahPost+1;
+    FROM [MARKETING].dbo.Post WHERE [Kontrak Id] = ${id};`;
+    const numberOfPostResult = await pool.request().query(numberOfSlotQuery);
+    const { recordset: slotNumberRecordset } = numberOfPostResult;
+    const [{ JumlahPost }] = slotNumberRecordset;
+    const postNumber = JumlahPost + 1;
 
-    const {recordset} = result;
+    const { recordset } = result;
     resp.status = "true";
-    resp.message = {...recordset[0], postNumber};
-    
+    resp.message = { ...recordset[0], postNumber };
+
     return resp;
   } catch (err) {
     console.error(err);
@@ -263,7 +258,7 @@ const GetSubMediaById = async (req) => {
     if (typeof result.recordset !== "undefined") {
       if (result.recordset.length >= 1) {
         resp.status = "true";
-        listArr = [];
+        let listArr = [];
         result.recordset.forEach((element) => {
           listArr.push(element.SUB_MEDIA);
         });
@@ -468,7 +463,7 @@ const GetListKontrakIteration = async () => {
     if (typeof result.recordset !== "undefined") {
       if (result.recordset.length >= 1) {
         resp.status = "true";
-        console.log("halo", result.recordset)
+        console.log("halo", result.recordset);
         resp.message = result.recordset;
       }
     }
@@ -664,9 +659,9 @@ const GetListManager = async () => {
 
 const insertNewPost = async (req) => {
   let resp = { status: "false" };
-  console.log("ini req", req)
+  console.log("ini req", req);
   try {
-    const {KontrakId, ManagerId, BriefId, TglPostKontrak, User} = req;
+    const { KontrakId, ManagerId, BriefId, TglPostKontrak, User } = req;
     const pool = await poolPromise;
 
     const result = await pool
@@ -724,7 +719,7 @@ const UpdatePostStatsById = async (req) => {
         });
         try {
           const res = await axios.post(
-            pythonUrl + "/getTiktokVideoWithUserStats/",
+            PYTHON_URL + "/getTiktokVideoWithUserStats/",
             data,
             {
               headers: {
@@ -783,19 +778,16 @@ const UpdatePostStatsById = async (req) => {
 const getPostDetail = async (req) => {
   let resp = { status: "false" };
   try {
-    const {id} = req;
+    const { id } = req;
     const pool = await poolPromise;
-    const query = QUERIES.GET_POST_DETAIL_QUERY
-    const result = await pool
-    .request()
-    .input("postId", id)
-    .query(query);
+    const query = QUERIES.GET_POST_DETAIL_QUERY;
+    const result = await pool.request().input("postId", id).query(query);
     console.log(result.recordset);
 
-    const {recordset} = result;
+    const { recordset } = result;
     resp.status = "true";
-    resp.message = {...recordset[0]};
-    
+    resp.message = { ...recordset[0] };
+
     return resp;
   } catch (err) {
     console.error(err);
@@ -805,24 +797,24 @@ const getPostDetail = async (req) => {
 
 const updatePostById = async (id, payload) => {
   let resp = { status: "false" };
-  const {linkPost, deadlineDate, uploadDate} = payload
+  const { linkPost, deadlineDate, uploadDate } = payload;
   try {
     const pool = await poolPromise;
-    const query = QUERIES.UPDATE_POST_QUERY
+    const query = QUERIES.UPDATE_POST_QUERY;
     const result = await pool
-    .request()
-    .input("postId", id)
-    .input("linkPost", linkPost)
-    .input("deadlineDate", deadlineDate)
-    .input("uploadDate", uploadDate)
-    .query(query);
+      .request()
+      .input("postId", id)
+      .input("linkPost", linkPost)
+      .input("deadlineDate", deadlineDate)
+      .input("uploadDate", uploadDate)
+      .query(query);
     console.log(result);
 
-    const{rowsAffected} = result
-    if(rowsAffected[0]===1){
-      resp.status="true"
+    const { rowsAffected } = result;
+    if (rowsAffected[0] === 1) {
+      resp.status = "true";
     }
-    
+
     return resp;
   } catch (err) {
     console.error(err);
@@ -830,6 +822,69 @@ const updatePostById = async (id, payload) => {
   }
 };
 
+const updatePostStatisticScheduler = async () => {
+  let resp = { status: "false" };
+  const dayToFetch = [1, 3, 7, 14, 28];
+
+  try {
+    const pool = await poolPromise;
+    const query = QUERIES.GET_UPLOADED_POST;
+    const result = await pool.request().query(query);
+
+    const { recordset = [] } = result;
+    const postsToBeUpdated = recordset.filter((data) =>
+      dayToFetch.includes(data.dateDifference)
+    );
+    console.log("Posts to Be Updated:", postsToBeUpdated);
+
+    const postsStatistics = await Promise.all(
+      postsToBeUpdated.map(async (post) => {
+        const { postId, linkPost, dateDifference } = post;
+        const mappedInfo = { postId, linkPost, dateDifference };
+        const emptyPost = {
+          followers: 0,
+          comments: 0,
+          likes: 0,
+          shares: 0,
+          views: 0,
+        };
+
+        const fetchedStatistic = await PythonConnector.fetchPostStatistic(
+          linkPost
+        );
+        const { status, message } = fetchedStatistic;
+
+        if (status === "false") {
+          return { ...mappedInfo, ...emptyPost };
+        }
+
+        const {
+          user: { followerCount },
+          video: { commentCount, likeCount, shareCount, viewCount },
+        } = message;
+        const postStatistic = {
+          followers: followerCount,
+          comments: commentCount,
+          likes: likeCount,
+          shares: shareCount,
+          views: viewCount,
+        };
+
+        return { ...mappedInfo, ...postStatistic };
+      })
+    );
+
+    console.log("Ini post statistics", postsStatistics);
+
+    resp.status = "true";
+    resp.message = { ...recordset[0] };
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
 
 module.exports = {
   insertNewKOL,
@@ -854,5 +909,6 @@ module.exports = {
   ExecSPWithInput,
   UpdatePostStatsById,
   getPostDetail,
-  updatePostById
+  updatePostById,
+  updatePostStatisticScheduler,
 };

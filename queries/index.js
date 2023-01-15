@@ -26,7 +26,18 @@ GET_POST_DETAIL_QUERY : `SELECT
 GET_CONTRACT_DETAIL_QUERY: `select * from [MARKETING].[dbo].[Kol Kontrak] where [Kontrak Id] = @contractId`,
 UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
     SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=getdate()
-    WHERE [Post Id]=@postId;`
+    WHERE [Post Id]=@postId;`,
+GET_UPLOADED_POST: `SELECT [Post Id] as postId, 
+    [Tgl Post Sesuai Jadwal] as deadlineDate, 
+    [Tgl Post Real] as uploadDate, 
+    [Kontrak Id] as contractId, 
+    [Manager Id] as managerId, 
+    [Brief Id] as briefId, 
+    [Link Post] as linkPost, 
+    [Slot Ke] as slotNumber, 
+    DATEDIFF(day,[Tgl Post Real], GETDATE()) as dateDifference
+    FROM MARKETING.dbo.Post
+    WHERE [Tgl Post Real] IS NOT NULL`
 }
 
 module.exports =  {QUERIES}

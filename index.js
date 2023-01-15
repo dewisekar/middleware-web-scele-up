@@ -16,6 +16,7 @@ const {
   isExistFileResi,
   insertDailyFileResi,
 } = require("./routes/ValidateUsername");
+const cron = require('node-cron');
 
 const { getRekapPengirimanByMonth } = require("./routes/Rekap");
 const {
@@ -42,6 +43,7 @@ const {
   GetKontrakDetailByID,
   getPostDetail,
   updatePostById,
+  updatePostStatisticScheduler
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -454,7 +456,12 @@ app.patch("/updatePost", async (req, res) => {
 //#endregion
 //app.use("/authenticateLogin", validateUsername);
 
+// scheduler to update post statistic
+cron.schedule('50 03 * * * *', async () => {
+  console.log("Running scheduler to update post statistics")
+  await updatePostStatisticScheduler()
+});
+
 app.listen(port, () => {
-  //server starts listening for any attempts from a client to connect at port: {port}
   console.log(`Now listening on port ${port}`);
 });
