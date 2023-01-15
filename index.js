@@ -457,7 +457,7 @@ app.patch("/updatePost", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('58 42 * * * *', async () => {
+cron.schedule('* * 1 * * *', async () => {
   console.log("Running scheduler to update post statistics")
   await updatePostStatisticScheduler()
 });
