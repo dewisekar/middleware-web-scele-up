@@ -45,6 +45,7 @@ const {
   updatePostById,
   updatePostStatisticScheduler,
   getPostStatisticByPostId,
+  getContractRenewalList,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -436,11 +437,18 @@ app.patch("/updatePost", async (req, res) => {
   res.send(result);
 });
 
-
 app.get("/getPostStatisticByPostId", async (req, res) => {
   const {id} = req.query
   let result = await getPostStatisticByPostId(id);
   console.log("routes:/getPostStatisticByPostId");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getContractRenewalList", async (req, res) => {
+  let result = await getContractRenewalList();
+  console.log("routes:/getContractRenewalList");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);

@@ -46,7 +46,15 @@ GET_POST_STATISTIC_BY_POST_ID: `SELECT postId, followers, comments,
     likes, shares, views, id, dayNumber, createdAt
     FROM MARKETING.dbo.Post_View
     WHERE postId = @postId
-    ORDER BY dayNumber ASC;`
+    ORDER BY dayNumber ASC;`,
+GET_CONTRACT_RENEWAL_LIST: `SELECT 
+    a.[Kontrak Id] as contractId,
+    b.Name as kolName,
+    c.[Kontrak Ke] as contractNumber,
+    DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) as dateDifference
+    FROM MARKETING.dbo.[Kol Kontrak] a
+    JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
+    JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id]`
 }
 
 module.exports =  {QUERIES}

@@ -845,7 +845,7 @@ const updatePostById = async (id, payload) => {
         postId: id,
         dateDifference: 1,
       };
-      
+
       await _insertPostStatistic(postStatistic);
     }
 
@@ -1002,6 +1002,30 @@ const getPostStatisticByPostId = async (postId) => {
   }
 };
 
+const getContractRenewalList = async (postId) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("postId", postId)
+      .query(QUERIES.GET_CONTRACT_RENEWAL_LIST);
+    console.log(result.recordset);
+
+    const { recordset } = result;
+    const contractNeedsToRenew = recordset.filter(
+      (data) => data.dateDifference <= 30 && data.dateDifference >= 0
+    );
+    resp.status = "true";
+    resp.message = contractNeedsToRenew;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1029,4 +1053,5 @@ module.exports = {
   updatePostStatisticScheduler,
   _insertPostStatistic,
   getPostStatisticByPostId,
+  getContractRenewalList,
 };
