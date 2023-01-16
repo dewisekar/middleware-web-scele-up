@@ -51,10 +51,15 @@ GET_CONTRACT_RENEWAL_LIST: `SELECT
     a.[Kontrak Id] as contractId,
     b.Name as kolName,
     c.[Kontrak Ke] as contractNumber,
-    DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) as dateDifference
+    DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) as dateDifference,
+    a.[Booking Slot] as totalSlot,
+    a.[Masa Kontrak Akhir] as contractEndDate,
+    (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as uploadedPost,
+    a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as missedPost
     FROM MARKETING.dbo.[Kol Kontrak] a
     JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
-    JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id]`
+    JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id] 
+    WHERE DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) <= 30 AND DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) >=0`
 }
 
 module.exports =  {QUERIES}

@@ -1014,11 +1014,8 @@ const getContractRenewalList = async (postId) => {
     console.log(result.recordset);
 
     const { recordset } = result;
-    const contractNeedsToRenew = recordset.filter(
-      (data) => data.dateDifference <= 30 && data.dateDifference >= 0
-    );
     resp.status = "true";
-    resp.message = contractNeedsToRenew;
+    resp.message = recordset;
 
     return resp;
   } catch (error) {
