@@ -6,6 +6,7 @@ const { sendToTheQueue } = require("../utility/rabbitmq");
 const { PYTHON_URL } = require("../config");
 const { QUERIES } = require("../queries/index");
 const PythonConnector = require("../connectors/PythonConnector");
+const { upload } = require("../utility/multer");
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
@@ -795,10 +796,20 @@ const getPostDetail = async (req) => {
   }
 };
 
+const _getDayDifference = (early, later) => {
+  const diffTime = Math.abs(later - early);
+  console.log(early, later);
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+};
+
 const updatePostById = async (id, payload) => {
   let resp = { status: "false" };
   const { linkPost, deadlineDate, uploadDate } = payload;
   try {
+    const differenceUploadDateToToday = _getDayDifference(
+      new Date(uploadDate),
+      new Date()
+    );
     const pool = await poolPromise;
     const query = QUERIES.UPDATE_POST_QUERY;
     const result = await pool
@@ -813,6 +824,29 @@ const updatePostById = async (id, payload) => {
     const { rowsAffected } = result;
     if (rowsAffected[0] === 1) {
       resp.status = "true";
+    }
+
+    if (differenceUploadDateToToday > 0) {
+      console.log("Update post statistic for day 1");
+      const fetchedStatistic = await PythonConnector.fetchPostStatistic(
+        linkPost
+      );
+      const { message } = fetchedStatistic;
+      const {
+        user: { followerCount },
+        video: { commentCount, likeCount, shareCount, viewCount },
+      } = message;
+      const postStatistic = {
+        followers: followerCount,
+        comments: commentCount,
+        likes: likeCount,
+        shares: shareCount,
+        views: viewCount,
+        postId: id,
+        dateDifference: 1,
+      };
+      
+      await _insertPostStatistic(postStatistic);
     }
 
     return resp;
@@ -912,6 +946,7 @@ const updatePostStatisticScheduler = async () => {
         const fetchedStatistic = await PythonConnector.fetchPostStatistic(
           linkPost
         );
+        console.log("Fetched Statistic", fetchedStatistic);
         const { status, message } = fetchedStatistic;
 
         if (status === "false") {
@@ -955,11 +990,11 @@ const getPostStatisticByPostId = async (postId) => {
       .request()
       .input("postId", postId)
       .query(QUERIES.GET_POST_STATISTIC_BY_POST_ID);
-    console.log("halo", result.recordset)
+    console.log("halo", result.recordset);
 
     const { recordset } = result;
     resp.status = "true";
-    resp.message = recordset 
+    resp.message = recordset;
 
     return resp;
   } catch (error) {
@@ -993,5 +1028,5 @@ module.exports = {
   updatePostById,
   updatePostStatisticScheduler,
   _insertPostStatistic,
-  getPostStatisticByPostId
+  getPostStatisticByPostId,
 };

@@ -429,7 +429,6 @@ app.get("/getPostDetail", async (req, res) => {
 
 app.patch("/updatePost", async (req, res) => {
   const {query: {id}, body} = req
-  console.log("ini id", id, body)
   let result = await updatePostById(id, body);
   console.log("routes:/updatePost");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
@@ -468,7 +467,7 @@ app.get("/getPostStatisticByPostId", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('* 1 * * *', async () => {
+cron.schedule('* * 1 * * *', async () => {
   console.log("Running scheduler to update post statistics")
   await updatePostStatisticScheduler()
 });

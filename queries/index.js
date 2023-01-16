@@ -14,7 +14,8 @@ GET_POST_DETAIL_QUERY : `SELECT
     f.[Brief Code] as briefCode,
     g.[Manager Name] as kolManager,
     g.[Manager Id] as managerId,
-    d.[Kontrak Ke]  as contractNumber
+    d.[Kontrak Ke]  as contractNumber,
+    d.[Cost Per Slot] as costPerSlot
     FROM [MARKETING].dbo.Post a
     JOIN [MARKETING].dbo.[Kol Kontrak] b WITH(NOLOCK) on a.[Kontrak Id] = b.[Kontrak Id]
     JOIN [MARKETING].dbo.Kol c WITH(NOLOCK) on b.[Kol Id] = c.[Kol Id] 
