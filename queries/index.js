@@ -33,6 +33,13 @@ b.[Kategori KOL] as kolCategory,
 b.[No Whatsapp] as kolPhone,
 c.[Kontrak Ke] as contractNumber,
 e.[Manager Name] as managerName,
+c.[Cost Per Slot] as costPerSlot,
+CASE 
+	When DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) <= 30 and DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) >=0 THEN 'PERLU DIPERBARUI'
+	WHEN DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) < 0 THEN 'TIDAK AKTIF'
+	WHEN c.[Slot Terupload] = a.[Booking Slot] THEN 'SLOT PENUH'
+	else 'AKTIF'
+END as contractStatus,
 (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as uploadedPost,
 a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as missedPost
 from [MARKETING].[dbo].[Kol Kontrak] a
