@@ -24,7 +24,22 @@ GET_POST_DETAIL_QUERY : `SELECT
     JOIN [MARKETING].dbo.[Brief Status] f WITH(NOLOCK) ON e.[Brief Id] = f.[Brief Id]
     JOIN [MARKETING].dbo.[Kol Manager] g ON a.[Manager Id] = g.[Manager Id] 
     WHERE a.[Post Id] = @postId`,
-GET_CONTRACT_DETAIL_QUERY: `select * from [MARKETING].[dbo].[Kol Kontrak] where [Kontrak Id] = @contractId`,
+GET_CONTRACT_DETAIL_QUERY: `SELECT a.* ,
+b.Name as kolName,
+b.Username as username,
+b.Platform as platform,
+b.Jenis as kolType,
+b.[Kategori KOL] as kolCategory,
+b.[No Whatsapp] as kolPhone,
+c.[Kontrak Ke] as contractNumber,
+e.[Manager Name] as managerName,
+(SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as uploadedPost,
+a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as missedPost
+from [MARKETING].[dbo].[Kol Kontrak] a
+JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
+JOIN MARKETING.dbo.[Kol Kontrak Status] c on c.[Kontrak Id] = a.[Kontrak Id] 
+JOIN MARKETING.dbo.[Kol Manager] e on e.[Manager Id] = a.[Manager Id] 
+where a.[Kontrak Id] = @contractId`,
 UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
     SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=getdate()
     WHERE [Post Id]=@postId;`,

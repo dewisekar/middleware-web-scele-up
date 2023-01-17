@@ -475,8 +475,9 @@ app.get("/getContractRenewalList", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('* * 1 * * *', async () => {
-  console.log("Running scheduler to update post statistics")
+cron.schedule('0 1 * * *', async () => {
+  const date = new Date()
+  console.log("Running scheduler to update post statistics at: ", date)
   await updatePostStatisticScheduler()
 });
 
