@@ -35,8 +35,8 @@ c.[Kontrak Ke] as contractNumber,
 e.[Manager Name] as managerName,
 c.[Cost Per Slot] as costPerSlot,
 CASE 
-	When DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) <= 30 and DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) >=0 THEN 'PERLU DIPERBARUI'
-	WHEN DATEDIFF(day, a.[Masa Kontrak Akhir] , GETDATE()) < 0 THEN 'TIDAK AKTIF'
+	When DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
+	WHEN DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) < 0 THEN 'TIDAK AKTIF'
 	WHEN c.[Slot Terupload] = a.[Booking Slot] THEN 'SLOT PENUH'
 	else 'AKTIF'
 END as contractStatus,
@@ -73,7 +73,7 @@ GET_CONTRACT_RENEWAL_LIST: `SELECT
     a.[Kontrak Id] as contractId,
     b.Name as kolName,
     c.[Kontrak Ke] as contractNumber,
-    DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) as dateDifference,
+    DATEDIFF(day, GETDATE(), [Masa Kontrak Akhir]) as dateDifference,
     a.[Booking Slot] as totalSlot,
     a.[Masa Kontrak Akhir] as contractEndDate,
     (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as uploadedPost,
@@ -81,7 +81,7 @@ GET_CONTRACT_RENEWAL_LIST: `SELECT
     FROM MARKETING.dbo.[Kol Kontrak] a
     JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
     JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id] 
-    WHERE DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) <= 30 AND DATEDIFF(day,[Masa Kontrak Akhir], GETDATE()) >=0`
+    WHERE DATEDIFF(day, GETDATE(),[Masa Kontrak Akhir]) <= 30 AND DATEDIFF(day, GETDATE(),[Masa Kontrak Akhir]) >=0`
 }
 
 module.exports =  {QUERIES}
