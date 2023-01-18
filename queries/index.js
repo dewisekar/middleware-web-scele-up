@@ -34,6 +34,8 @@ b.[No Whatsapp] as kolPhone,
 c.[Kontrak Ke] as contractNumber,
 e.[Manager Name] as managerName,
 c.[Cost Per Slot] as costPerSlot,
+c.[Sisa Slot],
+c.[Slot Terupload],
 CASE 
 	When DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
 	WHEN DATEDIFF(day, GETDATE(), a.[Masa Kontrak Akhir] ) < 0 THEN 'TIDAK AKTIF'
