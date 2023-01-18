@@ -805,10 +805,12 @@ const _getDayDifference = (early, later) => {
 const updatePostById = async (id, payload) => {
   let resp = { status: "false" };
   const { linkPost, deadlineDate, uploadDate } = payload;
+  const today = new Date()
+  const todayGMT = today.setHours(today.getHours() + 7);
   try {
     const differenceUploadDateToToday = _getDayDifference(
       new Date(uploadDate),
-      new Date()
+      new Date(todayGMT)
     );
     const pool = await poolPromise;
     const query = QUERIES.UPDATE_POST_QUERY;

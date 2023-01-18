@@ -475,9 +475,12 @@ app.get("/getContractRenewalList", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('0 1 * * *', async () => {
+cron.schedule('* 0 01 * * *', async () => {
   const date = new Date()
-  console.log("Running scheduler to update post statistics at: ", date)
+  var utcSeconds = 1234567890;
+  const gmtDate = date.setHours(date.getHours() + 7);
+
+  console.log("Running scheduler to update post statistics at: ", new Date(gmtDate))
   await updatePostStatisticScheduler()
 });
 
