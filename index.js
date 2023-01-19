@@ -46,6 +46,7 @@ const {
   updatePostStatisticScheduler,
   getPostStatisticByPostId,
   getContractRenewalList,
+  getBriefDetail,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -454,6 +455,15 @@ app.get("/getContractRenewalList", async (req, res) => {
   res.send(result);
 });
 
+app.get("/getBriefDetail", async (req, res) => {
+  const {id} = req.query
+  let result = await getBriefDetail(id);
+  console.log("routes:/getBriefDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
@@ -477,7 +487,6 @@ app.get("/getContractRenewalList", async (req, res) => {
 // scheduler to update post statistic
 cron.schedule('* 0 01 * * *', async () => {
   const date = new Date()
-  var utcSeconds = 1234567890;
   const gmtDate = date.setHours(date.getHours() + 7);
 
   console.log("Running scheduler to update post statistics at: ", new Date(gmtDate))

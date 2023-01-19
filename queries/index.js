@@ -83,7 +83,19 @@ GET_CONTRACT_RENEWAL_LIST: `SELECT
     FROM MARKETING.dbo.[Kol Kontrak] a
     JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
     JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id] 
-    WHERE DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) <= 30 AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) >=0`
+    WHERE DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) <= 30 AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) >=0`,
+GET_BRIEF_DETAIL: `SELECT a.[Brief Id] as briefId,
+    b.[Brief Code] AS briefCode,
+    a.[Tema] as theme,
+    a.[Konsep] as concept,
+    a.[Link Referensi Video] as reference,
+    a.[Script] as script,
+    b.[Brief Code]+ ' - ' + a.[Tema] as briefCodeTheme,
+    c.[Manager Name] as managerName
+    FROM  MARKETING.dbo.Brief a WITH(NOLOCK) 
+    LEFT JOIN MARKETING.dbo.[Brief Status] b WITH(NOLOCK) on a.[Brief Id] = b.[Brief Id]
+    LEFT JOIN MARKETING.dbo.[Kol Manager] c WITH(NOLOCK) on a.[Manager Id] = c.[Manager Id]
+    where a.[Brief Id] = @briefId`
 }
 
 module.exports =  {QUERIES}

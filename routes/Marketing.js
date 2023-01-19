@@ -1025,6 +1025,27 @@ const getContractRenewalList = async (postId) => {
   }
 };
 
+const getBriefDetail = async (briefId) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("briefId", briefId)
+      .query(QUERIES.GET_BRIEF_DETAIL);
+    console.log(result.recordset);
+
+    const { recordset } = result;
+    resp.status = "true";
+    resp.message = recordset[0];
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1053,4 +1074,5 @@ module.exports = {
   _insertPostStatistic,
   getPostStatisticByPostId,
   getContractRenewalList,
+  getBriefDetail
 };
