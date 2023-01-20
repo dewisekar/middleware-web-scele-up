@@ -29,7 +29,7 @@ b.Name as kolName,
 b.Username as username,
 b.Platform as platform,
 b.Jenis as kolType,
-b.[Kategori KOL] as kolCategory,
+f.[category] as kolCategory,
 b.[No Whatsapp] as kolPhone,
 c.[Kontrak Ke] as contractNumber,
 e.[Manager Name] as managerName,
@@ -48,6 +48,7 @@ from [MARKETING].[dbo].[Kol Kontrak] a
 JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
 JOIN MARKETING.dbo.[Kol Kontrak Status] c on c.[Kontrak Id] = a.[Kontrak Id] 
 JOIN MARKETING.dbo.[Kol Manager] e on e.[Manager Id] = a.[Manager Id] 
+JOIN MARKETING.dbo.[KolCategory] f on f.[id] = b.[Kategori Kol] 
 where a.[Kontrak Id] = @contractId`,
 UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
     SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=dateadd(HOUR, 7, getdate()) 
@@ -95,7 +96,57 @@ GET_BRIEF_DETAIL: `SELECT a.[Brief Id] as briefId,
     FROM  MARKETING.dbo.Brief a WITH(NOLOCK) 
     LEFT JOIN MARKETING.dbo.[Brief Status] b WITH(NOLOCK) on a.[Brief Id] = b.[Brief Id]
     LEFT JOIN MARKETING.dbo.[Kol Manager] c WITH(NOLOCK) on a.[Manager Id] = c.[Manager Id]
-    where a.[Brief Id] = @briefId`
+    where a.[Brief Id] = @briefId`,
+GET_POST_BY_MANAGER_ID: `SELECT 
+    g.Name + ' - (' + CONVERT(VARCHAR,  f.[Kontrak Ke]) +')' as contractName,
+    a.[Tgl Post Real] as uploadDate,
+    g.Username as username, 
+    a.[Link Post] as linkPost,
+    h.[Manager Name] as managerName
+    from MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak] e on a.[Kontrak Id] = e.[Kontrak Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak Status] f on f.[Kontrak Id] = a.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol g on e.[Kol Id] = g.[Kol Id] 
+    JOIN MARKETING.dbo.[Kol Manager] h on h.[Manager Id] = a.[Manager Id] 
+    WHERE a.[Manager Id] = @managerId and a.[Tgl Post Real] is not null
+    order by a.[Post Id]`,
+GET_POST_VIEW_BY_MANAGER_ID: `SELECT 
+    g.Name + ' - (' + CONVERT(VARCHAR,  f.[Kontrak Ke]) +')' as contractName,
+    a.[Tgl Post Real] as uploadDate,
+    g.Username as username, 
+    a.[Link Post] as linkPost,
+    h.[Manager Name] as managerName,
+    f.[Cost Per Slot] as costPerSlot,
+    b.*
+    from MARKETING.dbo.Post a
+    left JOIN MARKETING.dbo.Post_View b on a.[Post Id] = b.postId 
+    JOIN MARKETING.dbo.Brief c on a.[Brief Id] = c.[Brief Id] 
+    JOIN MARKETING.dbo.[Brief Status] d on c.[Brief Id] = d.[Brief Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak] e on a.[Kontrak Id] = e.[Kontrak Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak Status] f on f.[Kontrak Id] = a.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol g on e.[Kol Id] = g.[Kol Id] 
+    JOIN MARKETING.dbo.[Kol Manager] h on h.[Manager Id] = a.[Manager Id] 
+    WHERE a.[Manager Id] = @managerId and a.[Tgl Post Real] is not null and b.dayNumber = 7
+    order by a.[Tgl Post Real] asc`,
+GET_UNEXISTS_POST_VIEW_BY_MANAGER_ID: `SELECT 
+    g.Name + ' - (' + CONVERT(VARCHAR,  f.[Kontrak Ke]) +')' as contractName,
+    a.[Tgl Post Real] as uploadDate,
+    g.Username as username, 
+    a.[Link Post] as linkPost,
+    h.[Manager Name] as managerName,
+    f.[Cost Per Slot] as costPerSlot
+    from MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak] e on a.[Kontrak Id] = e.[Kontrak Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak Status] f on f.[Kontrak Id] = a.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol g on e.[Kol Id] = g.[Kol Id] 
+    JOIN MARKETING.dbo.[Kol Manager] h on h.[Manager Id] = a.[Manager Id] 
+    WHERE a.[Manager Id] = @managerId and a.[Tgl Post Real] is not null
+    and a.[Post Id] not in 
+    (select i.[Post Id] 
+    from MARKETING.dbo.Post i 
+    join MARKETING.dbo.Post_View j on j.postId = i.[Post Id] 
+    where i.[Manager Id]= @managerId and j.dayNumber = 7)
+    order by a.[Post Id]`
 }
 
 module.exports =  {QUERIES}

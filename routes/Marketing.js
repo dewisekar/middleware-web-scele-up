@@ -937,8 +937,8 @@ const updatePostStatisticScheduler = async () => {
     );
     console.log("Posts to Be Updated:", postsToBeUpdated);
 
-    const postsStatistics = []
-    for(const post of postsToBeUpdated){
+    const postsStatistics = [];
+    for (const post of postsToBeUpdated) {
       const { postId, linkPost, dateDifference } = post;
       const mappedInfo = { postId, linkPost, dateDifference };
       const emptyPost = {
@@ -958,8 +958,8 @@ const updatePostStatisticScheduler = async () => {
       const { status, message } = fetchedStatistic;
 
       if (status === "false") {
-        postsStatistics.push({ ...mappedInfo, ...emptyPost })
-        return
+        postsStatistics.push({ ...mappedInfo, ...emptyPost });
+        return;
       }
 
       const {
@@ -974,9 +974,9 @@ const updatePostStatisticScheduler = async () => {
         views: viewCount,
       };
 
-      postsStatistics.push({ ...mappedInfo, ...postStatistic })
-    };
-    console.log("ini", postsStatistics)
+      postsStatistics.push({ ...mappedInfo, ...postStatistic });
+    }
+    console.log("ini", postsStatistics);
 
     postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
 
@@ -1053,6 +1053,37 @@ const getBriefDetail = async (briefId) => {
   }
 };
 
+const getPostViewByManagerId = async (managerId) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const postWithViews = await pool
+      .request()
+      .input("managerId", managerId)
+      .query(QUERIES.GET_POST_VIEW_BY_MANAGER_ID);
+    console.log(postWithViews.recordset);
+    const postWithNoViews = await pool
+      .request()
+      .input("managerId", managerId)
+      .query(QUERIES.GET_UNEXISTS_POST_VIEW_BY_MANAGER_ID);
+    console.log(postWithNoViews.recordset);
+
+    const { recordset: withViews } = postWithViews;
+    const { recordset: withNoViews } = postWithNoViews;
+    const mappedWithNoViews = withNoViews.map((data) => {
+      return { ...data, views: 0 };
+    });
+
+    resp.status = "true";
+    resp.message = [...withViews, ...mappedWithNoViews];
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1082,4 +1113,5 @@ module.exports = {
   getPostStatisticByPostId,
   getContractRenewalList,
   getBriefDetail,
+  getPostViewByManagerId,
 };
