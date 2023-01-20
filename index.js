@@ -485,7 +485,7 @@ app.get("/getBriefDetail", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('* 0 01 * * *', async () => {
+cron.schedule('* 0 1 * * *', async () => {
   const date = new Date()
   const gmtDate = date.setHours(date.getHours() + 7);
 

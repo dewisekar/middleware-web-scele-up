@@ -805,7 +805,7 @@ const _getDayDifference = (early, later) => {
 const updatePostById = async (id, payload) => {
   let resp = { status: "false" };
   const { linkPost, deadlineDate, uploadDate } = payload;
-  const today = new Date()
+  const today = new Date();
   const todayGMT = today.setHours(today.getHours() + 7);
   try {
     const differenceUploadDateToToday = _getDayDifference(
@@ -918,6 +918,10 @@ const _insertPostStatistic = async (payload) => {
   }
 };
 
+const sleep = async (time) => {
+  return new Promise((resolve) => setTimeout(resolve, time));
+};
+
 const updatePostStatisticScheduler = async () => {
   let resp = { status: "false" };
   const dayToFetch = [1, 3, 7, 14, 28];
@@ -933,43 +937,46 @@ const updatePostStatisticScheduler = async () => {
     );
     console.log("Posts to Be Updated:", postsToBeUpdated);
 
-    const postsStatistics = await Promise.all(
-      postsToBeUpdated.map(async (post) => {
-        const { postId, linkPost, dateDifference } = post;
-        const mappedInfo = { postId, linkPost, dateDifference };
-        const emptyPost = {
-          followers: 0,
-          comments: 0,
-          likes: 0,
-          shares: 0,
-          views: 0,
-        };
+    const postsStatistics = []
+    for(const post of postsToBeUpdated){
+      const { postId, linkPost, dateDifference } = post;
+      const mappedInfo = { postId, linkPost, dateDifference };
+      const emptyPost = {
+        followers: 0,
+        comments: 0,
+        likes: 0,
+        shares: 0,
+        views: 0,
+      };
 
-        const fetchedStatistic = await PythonConnector.fetchPostStatistic(
-          linkPost
-        );
-        console.log("Fetched Statistic", fetchedStatistic);
-        const { status, message } = fetchedStatistic;
+      await sleep(1000);
+      console.log("Fetching post statistic");
+      const fetchedStatistic = await PythonConnector.fetchPostStatistic(
+        linkPost
+      );
+      console.log("Fetched Statistic", fetchedStatistic);
+      const { status, message } = fetchedStatistic;
 
-        if (status === "false") {
-          return { ...mappedInfo, ...emptyPost };
-        }
+      if (status === "false") {
+        postsStatistics.push({ ...mappedInfo, ...emptyPost })
+        return
+      }
 
-        const {
-          user: { followerCount },
-          video: { commentCount, likeCount, shareCount, viewCount },
-        } = message;
-        const postStatistic = {
-          followers: followerCount,
-          comments: commentCount,
-          likes: likeCount,
-          shares: shareCount,
-          views: viewCount,
-        };
+      const {
+        user: { followerCount },
+        video: { commentCount, likeCount, shareCount, viewCount },
+      } = message;
+      const postStatistic = {
+        followers: followerCount,
+        comments: commentCount,
+        likes: likeCount,
+        shares: shareCount,
+        views: viewCount,
+      };
 
-        return { ...mappedInfo, ...postStatistic };
-      })
-    );
+      postsStatistics.push({ ...mappedInfo, ...postStatistic })
+    };
+    console.log("ini", postsStatistics)
 
     postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
 
@@ -1074,5 +1081,5 @@ module.exports = {
   _insertPostStatistic,
   getPostStatisticByPostId,
   getContractRenewalList,
-  getBriefDetail
+  getBriefDetail,
 };
