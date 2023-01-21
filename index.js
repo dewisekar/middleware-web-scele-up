@@ -48,6 +48,7 @@ const {
   getContractRenewalList,
   getBriefDetail,
   getPostViewByManagerId,
+  getOverviewData,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -474,6 +475,15 @@ app.get("/getPostViewByManager", async (req, res) => {
   res.send(result);
 });
 
+app.get("/getOverview", async (req, res) => {
+  const {id, params} = req.query
+  let result = await getOverviewData(params, id);
+  console.log("routes:/getOverview");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
@@ -495,7 +505,7 @@ app.get("/getPostViewByManager", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('0 1 * * *', async () => {
+cron.schedule('15 5 * * *', async () => {
   const date = new Date()
   const gmtDate = date.setHours(date.getHours() + 7);
 

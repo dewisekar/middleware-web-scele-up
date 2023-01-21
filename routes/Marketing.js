@@ -1084,6 +1084,33 @@ const getPostViewByManagerId = async (managerId) => {
   }
 };
 
+const getOverviewData = async (params, id) => {
+  let resp = { status: "false" };
+  const OVERVIEW_OPTIONS = {
+    BRIEF: {
+      input: "briefId",
+      query: QUERIES.GET_OVERVIEW_BY_BRIEF_ID,
+    },
+  };
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input(OVERVIEW_OPTIONS[params]['input'], id)
+      .query(OVERVIEW_OPTIONS[params]['query']);
+    console.log(result.recordset);
+
+    const { recordset } = result;
+    resp.status = "true";
+    resp.message = recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1114,4 +1141,5 @@ module.exports = {
   getContractRenewalList,
   getBriefDetail,
   getPostViewByManagerId,
+  getOverviewData,
 };
