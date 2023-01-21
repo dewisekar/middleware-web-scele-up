@@ -1099,6 +1099,10 @@ const getOverviewData = async (params, id) => {
       input: "kolCategoryId",
       query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID
     },
+    KOL: {
+      input: "kolId",
+      query: QUERIES.GET_OVERVIEW_BY_KOL_ID
+    },
   };
 
   try {
