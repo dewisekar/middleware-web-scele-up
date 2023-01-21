@@ -1095,6 +1095,10 @@ const getOverviewData = async (params, id) => {
       input: "managerId",
       query: QUERIES.GET_OVERVIEW_BY_MANAGER_ID,
     },
+    KOL_CATEGORY: {
+      input: "kolCategoryId",
+      query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID
+    },
   };
 
   try {
