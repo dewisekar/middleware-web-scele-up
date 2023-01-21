@@ -1123,6 +1123,41 @@ const getOverviewData = async (params, id) => {
   }
 };
 
+const getCostAndSlotOverview = async () => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const totalCostResult = await pool
+      .request()
+      .query(QUERIES.GET_TOTAL_COST_AND_SLOT);
+    console.log(totalCostResult.recordset);
+
+    const spentCostResult = await pool
+      .request()
+      .query(QUERIES.GET_UPLOADED_COST_AND_SLOT);
+    console.log(spentCostResult.recordset);
+
+    const { recordset: totalCost  } = totalCostResult;
+    const { recordset: spentCost  } = spentCostResult;
+    const totalCostData = totalCost[0];
+    const spentCostData = spentCost[0]
+    const remainingCostData = {
+      cost: totalCostData.cost - spentCostData.cost,
+      slot: totalCostData.slot - spentCostData.slot
+    }
+    console.log(remainingCostData)
+    resp.status = "true";
+    resp.message = {
+      totalCostData, spentCostData, remainingCostData
+    }
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1154,4 +1189,5 @@ module.exports = {
   getBriefDetail,
   getPostViewByManagerId,
   getOverviewData,
+  getCostAndSlotOverview,
 };

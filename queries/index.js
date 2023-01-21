@@ -194,7 +194,14 @@ GET_OVERVIEW_BY_KOL_ID: `SELECT AVG(views) as avgViews,
     JOIN MARKETING.dbo.[Kol Kontrak] d on d.[Kontrak Id] = b.[Kontrak Id] 
     where a.dayNumber = 7 and d.[Kol Id] = @kolId
     GROUP BY 
-    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`
+    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+GET_TOTAL_COST_AND_SLOT: `Select SUM(a.[Booking Slot]) as slot,
+    SUM(a.[Total Kerjasama]) as cost
+    From MARKETING.dbo.[Kol Kontrak] a`,
+GET_UPLOADED_COST_AND_SLOT: `Select SUM(b.[Cost Per Slot]) as cost, COUNT(a.[Post Id]) as slot
+    From MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
+    WHERE a.[Tgl Post Real] IS NOT NULL`
 }
 
 module.exports =  {QUERIES}

@@ -49,6 +49,7 @@ const {
   getBriefDetail,
   getPostViewByManagerId,
   getOverviewData,
+  getCostAndSlotOverview,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -479,6 +480,14 @@ app.get("/getOverview", async (req, res) => {
   const {id, params} = req.query
   let result = await getOverviewData(params, id);
   console.log("routes:/getOverview");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
+app.get("/getCostAndSlotOverview", async (req, res) => {
+  let result = await getCostAndSlotOverview();
+  console.log("routes:/getCostAndSlotOverview");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);
