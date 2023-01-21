@@ -1091,6 +1091,10 @@ const getOverviewData = async (params, id) => {
       input: "briefId",
       query: QUERIES.GET_OVERVIEW_BY_BRIEF_ID,
     },
+    MANAGER: {
+      input: "managerId",
+      query: QUERIES.GET_OVERVIEW_BY_MANAGER_ID,
+    },
   };
 
   try {

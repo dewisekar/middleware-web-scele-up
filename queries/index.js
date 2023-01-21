@@ -157,6 +157,17 @@ JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id]
 JOIN MARKETING.dbo.[Kol Kontrak Status] c on b.[Kontrak Id] = c.[Kontrak Id] 
 where a.dayNumber = 7 and b.[Brief Id] = @briefId
 GROUP BY 
+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+GET_OVERVIEW_BY_MANAGER_ID: `SELECT AVG(views) as avgViews, 
+SUM(views) as totalViews,
+COUNT(views) as numberOfPost, 
+AVG(c.[Cost Per Slot]/a.views*1000) as avgCpm,
+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+FROM MARKETING.dbo.Post_View a
+JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
+JOIN MARKETING.dbo.[Kol Kontrak Status] c on b.[Kontrak Id] = c.[Kontrak Id] 
+where a.dayNumber = 7 and b.[Manager Id] = @managerId
+GROUP BY 
 right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`
 }
 
