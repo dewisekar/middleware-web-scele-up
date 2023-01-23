@@ -50,6 +50,7 @@ const {
   getPostViewByManagerId,
   getOverviewData,
   getCostAndSlotOverview,
+  // regenerateContractFile,
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");

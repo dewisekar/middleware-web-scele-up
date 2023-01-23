@@ -1097,11 +1097,11 @@ const getOverviewData = async (params, id) => {
     },
     KOL_CATEGORY: {
       input: "kolCategoryId",
-      query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID
+      query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID,
     },
     KOL: {
       input: "kolId",
-      query: QUERIES.GET_OVERVIEW_BY_KOL_ID
+      query: QUERIES.GET_OVERVIEW_BY_KOL_ID,
     },
   };
 
@@ -1109,8 +1109,8 @@ const getOverviewData = async (params, id) => {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input(OVERVIEW_OPTIONS[params]['input'], id)
-      .query(OVERVIEW_OPTIONS[params]['query']);
+      .input(OVERVIEW_OPTIONS[params]["input"], id)
+      .query(OVERVIEW_OPTIONS[params]["query"]);
     console.log(result.recordset);
 
     const { recordset } = result;
@@ -1138,25 +1138,103 @@ const getCostAndSlotOverview = async () => {
       .query(QUERIES.GET_UPLOADED_COST_AND_SLOT);
     console.log(spentCostResult.recordset);
 
-    const { recordset: totalCost  } = totalCostResult;
-    const { recordset: spentCost  } = spentCostResult;
+    const { recordset: totalCost } = totalCostResult;
+    const { recordset: spentCost } = spentCostResult;
     const totalCostData = totalCost[0];
-    const spentCostData = spentCost[0]
+    const spentCostData = spentCost[0];
     const remainingCostData = {
       cost: totalCostData.cost - spentCostData.cost,
-      slot: totalCostData.slot - spentCostData.slot
-    }
-    console.log(remainingCostData)
+      slot: totalCostData.slot - spentCostData.slot,
+    };
+    console.log(remainingCostData);
     resp.status = "true";
     resp.message = {
-      totalCostData, spentCostData, remainingCostData
-    }
+      totalCostData,
+      spentCostData,
+      remainingCostData,
+    };
 
     return resp;
   } catch (error) {
     console.log(error);
   }
 };
+
+// const regenerateContractFile = async (contractId) => {
+//   let resp = { status: "false" };
+
+//   try {
+//     const pool = await poolPromise;
+//     const result = await pool
+//       .request()
+//       .input("contractId", contractId)
+//       .query(QUERIES.GET_CONTRACT_DETAIL_QUERY);
+//     console.log("Contract Detail", result);
+
+//     const { recordset } = result;
+//     console.log(recordset);
+//     const Id = recordset[0]["Kol Id"];
+//     const SubMedia = recordset[0]["Sub Media"];
+//     const BookingSlot = recordset[0]["Booking Slot"].toString();
+//     const BiayaKerjaSama = recordset[0]["Total Kerjasama"].toString();
+//     const DP = recordset[0]["DP"].toString();
+//     const TanggalAwalKerjaSama = "2023-01-25";
+//     const TanggalAkhirKerjaSama =  "2023-01-25";
+//     const User = 'jiera_marketing';
+//     const FileId = parseInt(contractId);
+
+//     const generateFilePayload = {
+//       Id,
+//       SubMedia,
+//       BookingSlot,
+//       BiayaKerjaSama,
+//       DP,
+//       TanggalAkhirKerjaSama,
+//       TanggalAwalKerjaSama,
+//       User,
+//       FileId
+//     };
+
+//     let status = await sendToTheQueue("generate_file_contract", generateFilePayload);
+//     console.log("payload", generateFilePayload)
+//     console.log(
+//       "sendToTheQueue, queue:generate_file_contract, msg : ",
+//       generateFilePayload,
+//       ",status:",
+//       status
+//     );
+
+//     let fileStatus = false;
+//     let count = 0;
+//     let maxIterator = 5;
+//     while (!fileStatus && count < maxIterator) {
+//       const result2 = await pool
+//         .request()
+//         .input("FileId", FileId)
+//         .execute("[MARKETING].[dbo].[SP_CheckStatusFile]");
+//       console.log("SP_CheckStatusFile:", result2.recordset);
+//       if (result2.recordset.length == 1) {
+//         if (result2.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
+//           if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
+//             fileStatus = true;
+//             resp.filename = result2.recordset[0]["FILE_NAME"];
+//           }
+//         }
+//       }
+//       await new Promise((resolve) => setTimeout(resolve, 2000));
+//       count = count + 1;
+//     }
+
+           
+
+//     resp.status = "true";
+//     resp.message = recordset;
+
+//     return resp;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 module.exports = {
   insertNewKOL,
@@ -1190,4 +1268,5 @@ module.exports = {
   getPostViewByManagerId,
   getOverviewData,
   getCostAndSlotOverview,
+  // regenerateContractFile,
 };
