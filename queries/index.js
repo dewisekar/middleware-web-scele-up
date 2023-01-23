@@ -201,7 +201,15 @@ GET_TOTAL_COST_AND_SLOT: `Select SUM(a.[Booking Slot]) as slot,
 GET_UPLOADED_COST_AND_SLOT: `Select SUM(b.[Cost Per Slot]) as cost, COUNT(a.[Post Id]) as slot
     From MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
-    WHERE a.[Tgl Post Real] IS NOT NULL`
+    WHERE a.[Tgl Post Real] IS NOT NULL`,
+GET_NOT_UPLOADED_POST: `SELECT c.Name as kolName,
+    a.[Tgl Post Sesuai Jadwal] as deadlineDate,
+    c.[No Whatsapp] as phoneNumber,
+    DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Tgl Post Sesuai Jadwal]) as deadline
+    FROM MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak] b on a.[Kontrak Id] = b.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol c on b.[Kol Id] = c.[Kol Id] 
+    WHERE a.[Tgl Post Real] IS NULL`
 }
 
 module.exports =  {QUERIES}

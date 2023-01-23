@@ -51,6 +51,7 @@ const {
   getOverviewData,
   getCostAndSlotOverview,
   // regenerateContractFile,
+  postReminderScheduler
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -521,6 +522,14 @@ cron.schedule('15 5 * * *', async () => {
 
   console.log("Running scheduler to update post statistics at: ", new Date(gmtDate))
   await updatePostStatisticScheduler()
+});
+
+cron.schedule('54 12 * * *', async () => {
+  const date = new Date()
+  const gmtDate = date.setHours(date.getHours() + 7);
+
+  console.log("Running scheduler for post reminder: ", new Date(gmtDate))
+  await postReminderScheduler()
 });
 
 app.listen(port, () => {

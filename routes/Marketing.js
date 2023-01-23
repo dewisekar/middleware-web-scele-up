@@ -6,7 +6,9 @@ const { sendToTheQueue } = require("../utility/rabbitmq");
 const { PYTHON_URL } = require("../config");
 const { QUERIES } = require("../queries/index");
 const PythonConnector = require("../connectors/PythonConnector");
+const WhatsappConnector = require("../connectors/WhatsappConnector");
 const { upload } = require("../utility/multer");
+const { getPostReminderTemplate } = require("../message-template");
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
@@ -69,13 +71,19 @@ const procToSendEmail = async (req) => {
 const replaceToIndonesianPhoneNumberFormat = (phoneNumber) => {
   const phoneNumberFirstDigit = phoneNumber[0];
   const phoneNumberFirstTwoDigit = phoneNumber.substring(0, 3);
-  const indonesianCodePhoneNumber = '62';
+  const indonesianCodePhoneNumber = "62";
 
-  if (phoneNumberFirstDigit === '0') {
-    return phoneNumber.replace(phoneNumberFirstDigit, indonesianCodePhoneNumber);
+  if (phoneNumberFirstDigit === "0") {
+    return phoneNumber.replace(
+      phoneNumberFirstDigit,
+      indonesianCodePhoneNumber
+    );
   }
-  if (phoneNumberFirstThreeDigit === '+62') {
-    return phoneNumber.replace(phoneNumberFirstThreeDigit, indonesianCodePhoneNumber);
+  if (phoneNumberFirstThreeDigit === "+62") {
+    return phoneNumber.replace(
+      phoneNumberFirstThreeDigit,
+      indonesianCodePhoneNumber
+    );
   }
   return phoneNumber;
 };
@@ -1240,8 +1248,6 @@ const getCostAndSlotOverview = async () => {
 //       count = count + 1;
 //     }
 
-           
-
 //     resp.status = "true";
 //     resp.message = recordset;
 
@@ -1250,6 +1256,41 @@ const getCostAndSlotOverview = async () => {
 //     console.log(error);
 //   }
 // };
+
+const postReminderScheduler = async () => {
+  let resp = { status: "false" };
+  const dayToFetch = [1, 3];
+
+  try {
+    const pool = await poolPromise;
+    const query = QUERIES.GET_NOT_UPLOADED_POST;
+    const result = await pool.request().query(query);
+
+    const { recordset = [] } = result;
+    const postsToBeUpdated = recordset.filter((data) =>
+      dayToFetch.includes(data.deadline)
+    );
+    console.log("Reminder:", postsToBeUpdated);
+
+    const messagePayload = postsToBeUpdated.map((data) => {
+      const { kolName, deadlineDate, phoneNumber } = data;
+      const message = getPostReminderTemplate(kolName, deadlineDate);
+      return {
+        number: phoneNumber + `@c.us`,
+        message,
+      };
+    });
+
+    messagePayload.forEach(async (message) => {
+      await WhatsappConnector.sendMessage(message);
+      console.log("send message to phone", message.number)
+    });
+
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
 
 module.exports = {
   insertNewKOL,
@@ -1284,4 +1325,5 @@ module.exports = {
   getOverviewData,
   getCostAndSlotOverview,
   // regenerateContractFile,
+  postReminderScheduler,
 };
