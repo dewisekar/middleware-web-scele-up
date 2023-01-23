@@ -24,4 +24,12 @@ const getPostReminderTemplate = (kolName, deadlineDate) => {
   return `Hai, ${kolName}!\n\nJangan lupa, untuk upload post pada tanggal ${convertedDate}, ya!\n\nBest regards,\n*-Team Jiera-*`;
 };
 
-module.exports = { getPostReminderTemplate };
+const getContractReminderTemplate = (payload) => {
+  const { kolName, contractEndDate, missedPost, totalSlot, dateDifference } =
+    payload;
+  const convertedDate = convertDate(new Date(contractEndDate));
+
+  return `Hai, ${kolName}!\n\nJangan lupa, untuk upload post yang berlum terpenuhi, ya! Kamu memiliki ${dateDifference} hari sebelum tanggal kontrakmu habis, yaitu tanggal ${convertedDate}.\n\nKamu masih memiliki *${missedPost}* slot post yang belum terupload dari total ${totalSlot} slot.\n\nBest regards,\n*-Team Jiera-*`;
+};
+
+module.exports = { getPostReminderTemplate, getContractReminderTemplate };

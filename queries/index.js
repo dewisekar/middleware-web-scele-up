@@ -79,6 +79,7 @@ GET_CONTRACT_RENEWAL_LIST: `SELECT
     DATEDIFF(day, dateadd(HOUR, 7, getdate()) , [Masa Kontrak Akhir]) as dateDifference,
     a.[Booking Slot] as totalSlot,
     a.[Masa Kontrak Akhir] as contractEndDate,
+    b.[No Whatsapp] as phoneNumber,
     (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as uploadedPost,
     a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL) as missedPost
     FROM MARKETING.dbo.[Kol Kontrak] a

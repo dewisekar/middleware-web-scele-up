@@ -51,7 +51,8 @@ const {
   getOverviewData,
   getCostAndSlotOverview,
   // regenerateContractFile,
-  postReminderScheduler
+  postReminderScheduler,
+  contractReminderScheduler
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -516,7 +517,7 @@ app.get("/getCostAndSlotOverview", async (req, res) => {
 //app.use("/authenticateLogin", validateUsername);
 
 // scheduler to update post statistic
-cron.schedule('15 5 * * *', async () => {
+cron.schedule('0 1 * * *', async () => {
   const date = new Date()
   const gmtDate = date.setHours(date.getHours() + 7);
 
@@ -524,12 +525,20 @@ cron.schedule('15 5 * * *', async () => {
   await updatePostStatisticScheduler()
 });
 
-cron.schedule('54 12 * * *', async () => {
+cron.schedule('0 9 * * *', async () => {
   const date = new Date()
   const gmtDate = date.setHours(date.getHours() + 7);
 
   console.log("Running scheduler for post reminder: ", new Date(gmtDate))
   await postReminderScheduler()
+});
+
+cron.schedule('30 9 * * *', async () => {
+  const date = new Date()
+  const gmtDate = date.setHours(date.getHours() + 7);
+
+  console.log("Running scheduler for contract reminder: ", new Date(gmtDate))
+  await contractReminderScheduler()
 });
 
 app.listen(port, () => {

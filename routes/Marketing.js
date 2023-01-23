@@ -8,7 +8,7 @@ const { QUERIES } = require("../queries/index");
 const PythonConnector = require("../connectors/PythonConnector");
 const WhatsappConnector = require("../connectors/WhatsappConnector");
 const { upload } = require("../utility/multer");
-const { getPostReminderTemplate } = require("../message-template");
+const { getPostReminderTemplate, getContractReminderTemplate } = require("../message-template");
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
@@ -1292,6 +1292,41 @@ const postReminderScheduler = async () => {
   }
 };
 
+const contractReminderScheduler = async () => {
+  let resp = { status: "false" };
+  const dayToFetch = [7,14];
+
+  try {
+    const pool = await poolPromise;
+    const query = QUERIES.GET_CONTRACT_RENEWAL_LIST;
+    const result = await pool.request().query(query);
+
+    const { recordset = [] } = result;
+    const kolList = recordset.filter((data) =>
+      dayToFetch.includes(data.dateDifference)
+    );
+    console.log("Reminder:", kolList);
+
+    const messagePayload = kolList.map((data) => {
+      const { phoneNumber} = data;
+      const message = getContractReminderTemplate(data);
+      return {
+        number: phoneNumber + `@c.us`,
+        message,
+      };
+    });
+
+    messagePayload.forEach(async (message) => {
+      await WhatsappConnector.sendMessage(message);
+      console.log("send message to phone", message.number)
+    });
+
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1326,4 +1361,5 @@ module.exports = {
   getCostAndSlotOverview,
   // regenerateContractFile,
   postReminderScheduler,
+  contractReminderScheduler
 };
