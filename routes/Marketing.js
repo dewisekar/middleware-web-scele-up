@@ -65,6 +65,21 @@ const procToSendEmail = async (req) => {
     return resp;
   }
 };
+
+const replaceToIndonesianPhoneNumberFormat = (phoneNumber) => {
+  const phoneNumberFirstDigit = phoneNumber[0];
+  const phoneNumberFirstTwoDigit = phoneNumber.substring(0, 3);
+  const indonesianCodePhoneNumber = '62';
+
+  if (phoneNumberFirstDigit === '0') {
+    return phoneNumber.replace(phoneNumberFirstDigit, indonesianCodePhoneNumber);
+  }
+  if (phoneNumberFirstThreeDigit === '+62') {
+    return phoneNumber.replace(phoneNumberFirstThreeDigit, indonesianCodePhoneNumber);
+  }
+  return phoneNumber;
+};
+
 const insertNewKOL = async (req) => {
   let resp = { status: "false" };
   try {
@@ -73,7 +88,7 @@ const insertNewKOL = async (req) => {
     let KategoriKOL = req.KategoriKOL;
     let NamaKOL = req.NamaKOL;
     let UsernameKOL = req.UsernameKOL;
-    let NoWhatsapp = req.NoWhatsapp;
+    let NoWhatsapp = replaceToIndonesianPhoneNumberFormat(req.NoWhatsapp);
     let AlamatKOL = req.AlamatKOL;
     let NorekKOL = req.NorekKOL;
     let KTP = req.KTP;
