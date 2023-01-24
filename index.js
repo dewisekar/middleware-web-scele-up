@@ -52,7 +52,8 @@ const {
   getCostAndSlotOverview,
   // regenerateContractFile,
   postReminderScheduler,
-  contractReminderScheduler
+  contractReminderScheduler,
+  getKolListByBrief
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -474,6 +475,14 @@ app.get("/getPostViewByManager", async (req, res) => {
   const {id} = req.query
   let result = await getPostViewByManagerId(id);
   console.log("routes:/getBriefDetail");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+app.get("/getKolListByBrief", async (req, res) => {
+  const {id} = req.query
+  let result = await getKolListByBrief(id);
+  console.log("routes:/getKolListByBrief");
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
   console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
   res.send(result);

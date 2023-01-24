@@ -1327,6 +1327,27 @@ const contractReminderScheduler = async () => {
   }
 };
 
+const getKolListByBrief = async (briefId) => {
+  let resp = { status: "false" };
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("briefId", briefId)
+      .query(QUERIES.GET_KOL_LIST_BY_BRIEF_ID);
+    console.log(result.recordset);
+
+    const { recordset } = result;
+    resp.status = "true";
+    resp.message = recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   insertNewKOL,
   GetFormatListKol,
@@ -1361,5 +1382,6 @@ module.exports = {
   getCostAndSlotOverview,
   // regenerateContractFile,
   postReminderScheduler,
-  contractReminderScheduler
+  contractReminderScheduler,
+  getKolListByBrief
 };

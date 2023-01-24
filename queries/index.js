@@ -210,7 +210,12 @@ GET_NOT_UPLOADED_POST: `SELECT c.Name as kolName,
     FROM MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak] b on a.[Kontrak Id] = b.[Kontrak Id] 
     JOIN MARKETING.dbo.Kol c on b.[Kol Id] = c.[Kol Id] 
-    WHERE a.[Tgl Post Real] IS NULL`
+    WHERE a.[Tgl Post Real] IS NULL`,
+GET_KOL_LIST_BY_BRIEF_ID: `SELECT DISTINCT c.Name as kolName
+    FROM MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak] b on a.[Kontrak Id] = b.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol c on c.[Kol Id] = b.[Kol Id] 
+    WHERE a.[Brief Id] = @briefId`
 }
 
 module.exports =  {QUERIES}
