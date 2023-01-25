@@ -8,7 +8,11 @@ const { QUERIES } = require("../queries/index");
 const PythonConnector = require("../connectors/PythonConnector");
 const WhatsappConnector = require("../connectors/WhatsappConnector");
 const { upload } = require("../utility/multer");
-const { getPostReminderTemplate, getContractReminderTemplate } = require("../message-template");
+const {
+  getPostReminderTemplate,
+  getContractReminderTemplate,
+  getBroadcastBriefTemplate
+} = require("../message-template");
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
@@ -1283,9 +1287,8 @@ const postReminderScheduler = async () => {
 
     messagePayload.forEach(async (message) => {
       await WhatsappConnector.sendMessage(message);
-      console.log("send message to phone", message.number)
+      console.log("send message to phone", message.number);
     });
-
   } catch (err) {
     console.error(err);
     return resp;
@@ -1294,7 +1297,7 @@ const postReminderScheduler = async () => {
 
 const contractReminderScheduler = async () => {
   let resp = { status: "false" };
-  const dayToFetch = [7,14];
+  const dayToFetch = [7, 14];
 
   try {
     const pool = await poolPromise;
@@ -1308,7 +1311,7 @@ const contractReminderScheduler = async () => {
     console.log("Reminder:", kolList);
 
     const messagePayload = kolList.map((data) => {
-      const { phoneNumber} = data;
+      const { phoneNumber } = data;
       const message = getContractReminderTemplate(data);
       return {
         number: phoneNumber + `@c.us`,
@@ -1318,9 +1321,8 @@ const contractReminderScheduler = async () => {
 
     messagePayload.forEach(async (message) => {
       await WhatsappConnector.sendMessage(message);
-      console.log("send message to phone", message.number)
+      console.log("send message to phone", message.number);
     });
-
   } catch (err) {
     console.error(err);
     return resp;
@@ -1341,6 +1343,54 @@ const getKolListByBrief = async (briefId) => {
     const { recordset } = result;
     resp.status = "true";
     resp.message = recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const sendBriefToDestination = async (payload) => {
+  let resp = { status: "false" };
+  const { params, destination, briefId } = payload;
+
+  try {
+    const pool = await poolPromise;
+    const kolResult = await pool
+      .request()
+      .execute("[MARKETING].[dbo].[SP_GetListKol]");
+    const { recordset } = kolResult;
+
+    const recipient = recordset.filter((data) =>
+      params === "kol"
+        ? destination.includes(data["Kol Id"])
+        : destination.includes(data["kolCategoryId"])
+    );
+
+    const briefResult = await pool
+      .request()
+      .input("briefId", briefId)
+      .query(QUERIES.GET_BRIEF_DETAIL);
+    const { recordset: briefRecordset } = briefResult;
+    const brief = briefRecordset[0]
+
+    const messagePayload = recipient.map((data) => {
+      const phoneNumber = data['No Whatsapp']
+      const kolName = data['Name']
+      const message = getBroadcastBriefTemplate({...brief, kolName});
+
+      return {
+        number: phoneNumber + `@c.us`,
+        message,
+      };
+    });
+
+    messagePayload.forEach(async (message) => {
+      await WhatsappConnector.sendMessage(message);
+      console.log("send message to phone", message.number);
+    });
+
+    resp.status = "true";
 
     return resp;
   } catch (error) {
@@ -1383,5 +1433,6 @@ module.exports = {
   // regenerateContractFile,
   postReminderScheduler,
   contractReminderScheduler,
-  getKolListByBrief
+  getKolListByBrief,
+  sendBriefToDestination,
 };

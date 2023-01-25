@@ -53,7 +53,8 @@ const {
   // regenerateContractFile,
   postReminderScheduler,
   contractReminderScheduler,
-  getKolListByBrief
+  getKolListByBrief,
+  sendBriefToDestination
 } = require("./routes/Marketing");
 //const multer = require("multer");
 const { upload } = require("./utility/multer");
@@ -505,6 +506,15 @@ app.get("/getCostAndSlotOverview", async (req, res) => {
   res.send(result);
 });
 
+app.post("/broadcastBrief", async (req, res) => {
+  const {body} = req
+  let result = await sendBriefToDestination(body);
+  console.log("routes:/broadcastBrief");
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- req:", req.query);
+  console.log(Date().toString("YYYY-MM-DD HH:mm:ss"), "- res:", result);
+  res.send(result);
+});
+
 //#region
 // app.post("/uploadFile", (req, res) => {
 //   let resp = { status: "false" };
@@ -532,6 +542,7 @@ cron.schedule('0 1 * * *', async () => {
 
   console.log("Running scheduler to update post statistics at: ", new Date(gmtDate))
   await updatePostStatisticScheduler()
+  console.log("Updating statistic done")
 });
 
 cron.schedule('0 9 * * *', async () => {
