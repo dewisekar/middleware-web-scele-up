@@ -307,7 +307,7 @@ const getSubMediaById = async (req) => {
   }
 };
 
-const _regenerateContract = async (contractId) => {
+const _regenerateContract = async (contractId, isNewContract = true) => {
   try {
     const pool = await poolPromise;
     const query = QUERIES.GET_CONTRACT_DETAIL_QUERY;
@@ -315,7 +315,6 @@ const _regenerateContract = async (contractId) => {
       .request()
       .input('contractId', contractId)
       .query(query);
-    // console.log(result.recordset);
 
     const {
       managerName,
@@ -364,8 +363,16 @@ const _regenerateContract = async (contractId) => {
 
     console.log(payload);
 
-    await GenerateFile.generateFile(payload);
-    return true;
+    const fileName = await GenerateFile.generateFile(payload);
+
+    const updateQuery = isNewContract ? QUERIES.INSERT_FILE_MOU : QUERIES.UPDATE_FILE_MOU;
+    await pool
+      .request()
+      .input('contractId', contractId)
+      .input('fileName', fileName)
+      .query(updateQuery);
+
+    return fileName;
   } catch (err) {
     console.error(err);
     return err;
@@ -392,9 +399,11 @@ const checkFileStatus = async (req) => {
     }
 
     console.log('gaada');
-    await _regenerateContract(req.FileId);
+    const newGeneratedFile = await _regenerateContract(req.FileId, false);
 
-    return true;
+    resp.filename = newGeneratedFile;
+    resp.status = 'true';
+    return resp;
   } catch (err) {
     console.error(err);
     return resp;

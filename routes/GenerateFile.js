@@ -1,6 +1,5 @@
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-
 const fs = require('fs');
 const path = require('path');
 
@@ -10,7 +9,6 @@ const generateFile = async (payload) => {
   } = payload;
 
   const fileNameDocx = `${ID}_PKS.WMC_${BULAN}_${TAHUN}.docx`;
-  const fileNamePdf = `${ID}_PKS.WMC_${BULAN}_${TAHUN}.pdf`;
 
   const template = dpPercentage === '100%' ? '../template_full.docx' : '../template.docx';
   const content = fs.readFileSync(path.resolve(__dirname, template), 'binary');
@@ -29,14 +27,10 @@ const generateFile = async (payload) => {
   });
 
   const pathFileDocx = path.join(__dirname, `../docfiles/${fileNameDocx}`);
-  const pathFilePdf = path.join(__dirname, `../docfiles/${fileNamePdf}`);
 
-  // write docx
-  fs.writeFileSync(pathFileDocx, buf);
+  await fs.writeFileSync(pathFileDocx, buf);
 
-  //   const docxBuf = await fs.readFile(pathFileDocx);
-  //   const pdfBuf = await libre.convertAsync(docxBuf, ext, undefined);
-  //   await fs.writeFile(pathFilePdf, pdfBuf);
+  return pathFileDocx;
 };
 
 module.exports = { generateFile };

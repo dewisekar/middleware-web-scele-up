@@ -221,7 +221,13 @@ where a.[Kontrak Id] = @contractId`,
     FROM MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak] b on a.[Kontrak Id] = b.[Kontrak Id] 
     JOIN MARKETING.dbo.Kol c on c.[Kol Id] = b.[Kol Id] 
-    WHERE a.[Brief Id] = @briefId`
+    WHERE a.[Brief Id] = @briefId`,
+  INSERT_FILE_MOU: `INSERT INTO MARKETING.dbo.[File Mou]
+    ([File Name], [Progress Status], [Inserted Date], [Last Update Date], [Contract Id])
+    VALUES(@fileName, 2, GETDATE(), GETDATE(), @contractId);`,
+  UPDATE_FILE_MOU: `UPDATE MARKETING.dbo.[File Mou]
+    SET [File Name]=@fileName, [Last Update Date]=GETDATE()
+    WHERE [Contract Id]=@contractId;`
 };
 
 module.exports = { QUERIES };
