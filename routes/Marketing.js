@@ -11,7 +11,7 @@ const { upload } = require("../utility/multer");
 const {
   getPostReminderTemplate,
   getContractReminderTemplate,
-  getBroadcastBriefTemplate
+  getBroadcastBriefTemplate,
 } = require("../message-template");
 
 const sendEmail = async (receiverEmail, subject, content) => {
@@ -1372,12 +1372,12 @@ const sendBriefToDestination = async (payload) => {
       .input("briefId", briefId)
       .query(QUERIES.GET_BRIEF_DETAIL);
     const { recordset: briefRecordset } = briefResult;
-    const brief = briefRecordset[0]
+    const brief = briefRecordset[0];
 
     const messagePayload = recipient.map((data) => {
-      const phoneNumber = data['No Whatsapp']
-      const kolName = data['Name']
-      const message = getBroadcastBriefTemplate({...brief, kolName});
+      const phoneNumber = data["No Whatsapp"];
+      const kolName = data["Name"];
+      const message = getBroadcastBriefTemplate({ ...brief, kolName });
 
       return {
         number: phoneNumber + `@c.us`,
@@ -1386,15 +1386,17 @@ const sendBriefToDestination = async (payload) => {
     });
 
     messagePayload.forEach(async (message) => {
-      await WhatsappConnector.sendMessage(message);
+      const result = await WhatsappConnector.sendMessage(message);
+      if (result.status === "true") {
+        resp.status = "true";
+      }
       console.log("send message to phone", message.number);
     });
 
-    resp.status = "true";
-
     return resp;
   } catch (error) {
-    console.log(error);
+    console.log("error yaw");
+    return resp;
   }
 };
 

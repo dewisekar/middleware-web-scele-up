@@ -14,13 +14,14 @@ const sendMessage = async (payload) => {
 
     if (res.data.data !== "undefined") {
       let data = res.data.data;
-      resp.message = data
-      resp.status = "true"
+      resp.message = data;
+      resp.status = "true";
     }
 
     return resp;
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return error;
   }
 };
 
