@@ -1,22 +1,4 @@
-const DateMode = {
-  DDMMYYYY: "DDMMYYYY",
-  YYYYMMDD: "YYYYMMDD",
-};
-
-const convertDate = (date, mode = DateMode.DDMMYYYY) => {
-  const convertedDate = new Date(date);
-
-  const deadlineDay = ("0" + convertedDate.getDate()).slice(-2);
-  const deadlineMonth = ("0" + (convertedDate.getMonth() + 1)).slice(-2);
-  const deadlineYear = convertedDate.getFullYear();
-
-  const DateModes = {
-    DDMMYYYY: `${deadlineDay}-${deadlineMonth}-${deadlineYear}`,
-    YYYYMMDD: `${deadlineYear}-${deadlineMonth}-${deadlineDay}`,
-  };
-
-  return DateModes[mode];
-};
+const { convertDate } = require("../utils");
 
 const getPostReminderTemplate = (kolName, deadlineDate) => {
   const convertedDate = convertDate(new Date(deadlineDate));

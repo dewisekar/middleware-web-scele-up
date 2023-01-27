@@ -33,9 +33,15 @@ f.[category] as kolCategory,
 b.[No Whatsapp] as kolPhone,
 c.[Kontrak Ke] as contractNumber,
 e.[Manager Name] as managerName,
+e.NoKTP as managerKtp,
+e.ROLES as managerRole,
 c.[Cost Per Slot] as costPerSlot,
 c.[Sisa Slot],
 c.[Slot Terupload],
+b.KTP as kolKtp, 
+b.[Alamat KOL] as kolAddress,
+b.BANK as kolBank,
+b.[Nomor Rekening] as kolRekening,
 CASE 
 	When DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
 	WHEN DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) < 0 THEN 'TIDAK AKTIF'

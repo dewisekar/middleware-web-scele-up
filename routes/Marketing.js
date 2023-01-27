@@ -1,5 +1,6 @@
 const axios = require("axios");
 const nodemailer = require("nodemailer");
+const fs = require("fs");
 
 const { poolPromise } = require("../utility/database");
 const { sendToTheQueue } = require("../utility/rabbitmq");
@@ -7,12 +8,14 @@ const { PYTHON_URL } = require("../config");
 const { QUERIES } = require("../queries/index");
 const PythonConnector = require("../connectors/PythonConnector");
 const WhatsappConnector = require("../connectors/WhatsappConnector");
+const GenerateFile = require("./GenerateFile");
 const { upload } = require("../utility/multer");
 const {
   getPostReminderTemplate,
   getContractReminderTemplate,
   getBroadcastBriefTemplate,
 } = require("../message-template");
+const { convertDate, DateMode, convertToIdr } = require("../utils");
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = "failed";
@@ -306,20 +309,86 @@ const checkFileStatus = async (req) => {
   console.log("tes:", req);
   try {
     const pool = await poolPromise;
-    const result2 = await pool
+    const result = await pool
       .request()
       .input("FileId", req.FileId)
       .execute("[MARKETING].[dbo].[SP_CheckStatusFile]");
-    console.log("SP_CheckStatusFile:", result2.recordset);
-    if (result2.recordset.length == 1) {
-      if (result2.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-        if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-          resp.status = "true";
-          resp.filename = result2.recordset[0]["FILE_NAME"];
-        }
-      }
+    console.log("SP_CheckStatusFile:", result.recordset);
+
+    const { FILE_NAME: pathToFile } = result.recordset[0];
+
+    if (fs.existsSync(pathToFile)) {
+      resp.filename = pathToFile;
+      resp.status = "true";
+      return resp;
     }
+
+    console.log("gaada");
+    await _regenerateContract(req.FileId);
+  } catch (err) {
+    console.error(err);
     return resp;
+  }
+};
+
+const _regenerateContract = async (contractId) => {
+  try {
+    const pool = await poolPromise;
+    const query = QUERIES.GET_CONTRACT_DETAIL_QUERY;
+    const result = await pool
+      .request()
+      .input("contractId", contractId)
+      .query(query);
+    // console.log(result.recordset);
+
+    const {
+      managerName,
+      managerKtp,
+      managerRole,
+      kolName,
+      username,
+      platform,
+      kolKtp,
+      kolAddress,
+      kolBank,
+      kolRekening,
+      DP,
+    } = result.recordset[0];
+
+    const BIAYA = result.recordset[0]["Total Kerjasama"];
+    const contractStartDate = result.recordset[0]["Masa Kontrak Mulai"];
+    const contractEndDate = result.recordset[0]["Masa Kontrak Akhir"];
+    const contractSignedDate = result.recordset[0]["Tgl Kontrak"];
+    const SLOT = result.recordset[0]["Booking Slot"];
+    const convertedSignedDate = new Date(contractSignedDate)
+
+    const payload = {
+      ID : ("00" + contractId).slice(-3),
+      BULAN:  ("0" + (convertedSignedDate.getMonth() + 1)).slice(-2),
+      TAHUN: convertedSignedDate.getFullYear(),
+      DATE_NOW: convertDate(contractSignedDate, DateMode.DDDDMMYYY_INDONESIAN),
+      MANAGER_NAME: managerName,
+      MANAGER_ROLE: managerRole,
+      MANAGER_KTP: managerKtp,
+      KOL_NAME: kolName,
+      KOL_KTP: kolKtp,
+      KOL_ALAMAT: kolAddress,
+      PLATFORM: platform,
+      USERNAME:username,
+      TANGGAL_AWAL: convertDate(contractStartDate, DateMode.DDMMYYYY_INDONESIAN),
+      TANGGAL_AKHIR: convertDate(contractEndDate, DateMode.DDMMYYYY_INDONESIAN),
+      BIAYA: convertToIdr(BIAYA),
+      DP_Percentage: DP+'%',
+      Sisa_DP: convertToIdr(BIAYA-(BIAYA*DP/100)),
+      NOREK: kolRekening,
+      BANK: kolBank,
+      SLOT,
+      DP: convertToIdr(BIAYA*DP/100)
+    };
+
+    console.log(payload)
+
+    await GenerateFile.generateFile(payload)
   } catch (err) {
     console.error(err);
     return resp;
@@ -1187,80 +1256,6 @@ const getCostAndSlotOverview = async () => {
   }
 };
 
-// const regenerateContractFile = async (contractId) => {
-//   let resp = { status: "false" };
-
-//   try {
-//     const pool = await poolPromise;
-//     const result = await pool
-//       .request()
-//       .input("contractId", contractId)
-//       .query(QUERIES.GET_CONTRACT_DETAIL_QUERY);
-//     console.log("Contract Detail", result);
-
-//     const { recordset } = result;
-//     console.log(recordset);
-//     const Id = recordset[0]["Kol Id"];
-//     const SubMedia = recordset[0]["Sub Media"];
-//     const BookingSlot = recordset[0]["Booking Slot"].toString();
-//     const BiayaKerjaSama = recordset[0]["Total Kerjasama"].toString();
-//     const DP = recordset[0]["DP"].toString();
-//     const TanggalAwalKerjaSama = "2023-01-25";
-//     const TanggalAkhirKerjaSama =  "2023-01-25";
-//     const User = 'jiera_marketing';
-//     const FileId = parseInt(contractId);
-
-//     const generateFilePayload = {
-//       Id,
-//       SubMedia,
-//       BookingSlot,
-//       BiayaKerjaSama,
-//       DP,
-//       TanggalAkhirKerjaSama,
-//       TanggalAwalKerjaSama,
-//       User,
-//       FileId
-//     };
-
-//     let status = await sendToTheQueue("generate_file_contract", generateFilePayload);
-//     console.log("payload", generateFilePayload)
-//     console.log(
-//       "sendToTheQueue, queue:generate_file_contract, msg : ",
-//       generateFilePayload,
-//       ",status:",
-//       status
-//     );
-
-//     let fileStatus = false;
-//     let count = 0;
-//     let maxIterator = 5;
-//     while (!fileStatus && count < maxIterator) {
-//       const result2 = await pool
-//         .request()
-//         .input("FileId", FileId)
-//         .execute("[MARKETING].[dbo].[SP_CheckStatusFile]");
-//       console.log("SP_CheckStatusFile:", result2.recordset);
-//       if (result2.recordset.length == 1) {
-//         if (result2.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-//           if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-//             fileStatus = true;
-//             resp.filename = result2.recordset[0]["FILE_NAME"];
-//           }
-//         }
-//       }
-//       await new Promise((resolve) => setTimeout(resolve, 2000));
-//       count = count + 1;
-//     }
-
-//     resp.status = "true";
-//     resp.message = recordset;
-
-//     return resp;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
 const postReminderScheduler = async () => {
   let resp = { status: "false" };
   const dayToFetch = [1, 3];
@@ -1385,17 +1380,19 @@ const sendBriefToDestination = async (payload) => {
       };
     });
 
-    messagePayload.forEach(async (message) => {
+    for (const message of messagePayload) {
       const result = await WhatsappConnector.sendMessage(message);
       if (result.status === "true") {
         resp.status = "true";
+        console.log("hai", resp)
       }
       console.log("send message to phone", message.number);
-    });
+    }
+   
 
     return resp;
   } catch (error) {
-    console.log("error yaw");
+    console.log("error yaw", error);
     return resp;
   }
 };
