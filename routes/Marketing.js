@@ -1,3 +1,6 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
 const axios = require('axios');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
@@ -304,33 +307,6 @@ const getSubMediaById = async (req) => {
   }
 };
 
-const checkFileStatus = async (req) => {
-  const resp = { status: 'false' };
-  console.log('tes:', req);
-  try {
-    const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input('FileId', req.FileId)
-      .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
-    console.log('SP_CheckStatusFile:', result.recordset);
-
-    const { FILE_NAME: pathToFile } = result.recordset[0];
-
-    if (fs.existsSync(pathToFile)) {
-      resp.filename = pathToFile;
-      resp.status = 'true';
-      return resp;
-    }
-
-    console.log('gaada');
-    await _regenerateContract(req.FileId);
-  } catch (err) {
-    console.error(err);
-    return resp;
-  }
-};
-
 const _regenerateContract = async (contractId) => {
   try {
     const pool = await poolPromise;
@@ -389,9 +365,39 @@ const _regenerateContract = async (contractId) => {
     console.log(payload);
 
     await GenerateFile.generateFile(payload);
+    return true;
   } catch (err) {
     console.error(err);
     return err;
+  }
+};
+
+const checkFileStatus = async (req) => {
+  const resp = { status: 'false' };
+  console.log('tes:', req);
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('FileId', req.FileId)
+      .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
+    console.log('SP_CheckStatusFile:', result.recordset);
+
+    const { FILE_NAME: pathToFile } = result.recordset[0];
+
+    if (fs.existsSync(pathToFile)) {
+      resp.filename = pathToFile;
+      resp.status = 'true';
+      return resp;
+    }
+
+    console.log('gaada');
+    await _regenerateContract(req.FileId);
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    return resp;
   }
 };
 
@@ -424,9 +430,9 @@ const insertNewKontrak = async (req) => {
     console.log(result.recordset);
 
     if (typeof result.recordset !== 'undefined') {
-      if (result.recordset.length == 1) {
+      if (result.recordset.length === 1) {
         if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+          if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
             resp.status = 'true';
             resp.kontrakId = result.recordset[0].KONTRAK_ID;
             resp.kontrakKe = result.recordset[0].KONTRAK_KE;
@@ -450,9 +456,9 @@ const insertNewKontrak = async (req) => {
                 .input('FileId', req.FileId)
                 .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
               console.log('SP_CheckStatusFile:', result2.recordset);
-              if (result2.recordset.length == 1) {
+              if (result2.recordset.length === 1) {
                 if (result2.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-                  if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+                  if (result2.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
                     fileStatus = true;
                     resp.filename = result2.recordset[0].FILE_NAME;
                   }
@@ -532,6 +538,7 @@ const execSPWithInput = async (req) => {
 
     let request = pool.request();
 
+    // eslint-disable-next-line no-restricted-syntax
     for (const key in input) {
       request = request.input(key, input[key]);
     }
@@ -597,9 +604,9 @@ const insertNewBrief = async (req) => {
     console.log(result.recordset);
 
     if (typeof result.recordset !== 'undefined') {
-      if (result.recordset.length == 1) {
+      if (result.recordset.length === 1) {
         if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+          if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
             resp.status = 'true';
             resp.briefCode = result.recordset[0].BRIEF_CODE;
           } else {
@@ -672,9 +679,9 @@ const insertNewManager = async (req) => {
     console.log('[SP_InsertNewManager] result:', result.recordset);
 
     if (typeof result.recordset !== 'undefined') {
-      if (result.recordset.length == 1) {
+      if (result.recordset.length === 1) {
         if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+          if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
             const managerId = result.recordset[0].MANAGER_ID;
 
             const result2 = await pool
@@ -689,7 +696,7 @@ const insertNewManager = async (req) => {
             if (typeof result2.recordset !== 'undefined') {
               // notify to WA & Email
               if (result2.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-                if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+                if (result2.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
                   const subject = 'New Registration ERP BY JIERA ACCOUNT';
                   const content = `Hi, ${
                     ManagerName
@@ -775,9 +782,9 @@ const insertNewPost = async (req) => {
     console.log('[SP_InsertNewPost] result:', result.recordset);
 
     if (typeof result.recordset !== 'undefined') {
-      if (result.recordset.length == 1) {
+      if (result.recordset.length === 1) {
         if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+          if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
             const postId = result.recordset[0].POST_ID;
             resp.postId = postId;
             resp.status = 'true';
@@ -812,7 +819,7 @@ const updatePostStatsById = async (req) => {
       .input('Id', Id)
       .execute('[MARKETING].[dbo].[SP_GetPostDetailById]');
     if (typeof result.recordset !== 'undefined') {
-      if (result.recordset.length == 1) {
+      if (result.recordset.length === 1) {
         const linkPost = result.recordset[0]['Link Post'];
         const data = JSON.stringify({
           video_url: linkPost
@@ -829,13 +836,13 @@ const updatePostStatsById = async (req) => {
           );
 
           if (res.data.data !== 'undefined') {
-            const { data } = res.data;
-            console.log('data:', data);
-            const { followerCount } = data.user;
-            const { viewCount } = data.video;
-            const { likeCount } = data.video;
-            const { shareCount } = data.video;
-            const commentCount = data.video.shareCount;
+            const { data: postData } = res.data;
+            console.log('data:', postData);
+            const { followerCount } = postData.user;
+            const { viewCount } = postData.video;
+            const { likeCount } = postData.video;
+            const { shareCount } = postData.video;
+            const commentCount = postData.video.shareCount;
 
             const result2 = await pool
               .request()
@@ -848,7 +855,7 @@ const updatePostStatsById = async (req) => {
               .execute('[MARKETING].[dbo].[SP_UpdatePostStatsById]');
             if (typeof result2.recordset !== 'undefined') {
               console.log('SP_UpdatePostStatsById', result2.recordset);
-              if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+              if (result2.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
                 resp.status = 'true';
                 resp.message = 'success';
               } else {
@@ -899,6 +906,67 @@ const _getDayDifference = (early, later) => {
   const diffTime = Math.abs(later - early);
   console.log(early, later);
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+};
+
+const _insertNewLog = async (payload) => {
+  try {
+    const { query, user, responseMessage } = payload;
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('query', query)
+      .input('user', user)
+      .input('responseMessage', responseMessage)
+      .query(QUERIES.INSERT_NEW_LOG);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const _insertPostStatistic = async (payload) => {
+  const resp = { status: 'false' };
+
+  try {
+    const pool = await poolPromise;
+    const {
+      postId,
+      followers,
+      likes,
+      views,
+      comments,
+      shares,
+      dateDifference
+    } = payload;
+    const result = await pool
+      .request()
+      .input('postId', postId)
+      .input('followers', followers)
+      .input('likes', likes)
+      .input('views', views)
+      .input('comments', comments)
+      .input('shares', shares)
+      .input('dayNumber', dateDifference)
+      .execute('[MARKETING].[dbo].[SP_UpdatePostStatisticById]');
+
+    const { recordset } = result;
+    const [{ RESPONSE_MESSAGE }] = recordset;
+
+    const logPayload = {
+      query: `INSERT INTO DBO.POST_VIEW FOR POST ID: ${postId}`,
+      responseMessage: RESPONSE_MESSAGE,
+      user: ''
+    };
+    await _insertNewLog(logPayload);
+
+    if (RESPONSE_MESSAGE === 'SUCCESS') {
+      resp.status = 'true';
+    }
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };
 
 const updatePostById = async (id, payload) => {
@@ -959,66 +1027,7 @@ const updatePostById = async (id, payload) => {
   }
 };
 
-const _insertNewLog = async (payload) => {
-  try {
-    const { query, user, responseMessage } = payload;
-    const pool = await poolPromise;
-    await pool
-      .request()
-      .input('query', query)
-      .input('user', user)
-      .input('responseMessage', responseMessage)
-      .query(QUERIES.INSERT_NEW_LOG);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const _insertPostStatistic = async (payload) => {
-  const resp = { status: 'false' };
-
-  try {
-    const pool = await poolPromise;
-    const {
-      postId,
-      followers,
-      likes,
-      views,
-      comments,
-      shares,
-      dateDifference
-    } = payload;
-    const result = await pool
-      .request()
-      .input('postId', postId)
-      .input('followers', followers)
-      .input('likes', likes)
-      .input('views', views)
-      .input('comments', comments)
-      .input('shares', shares)
-      .input('dayNumber', dateDifference)
-      .execute('[MARKETING].[dbo].[SP_UpdatePostStatisticById]');
-
-    const { recordset, recordsets } = result;
-    const [{ RESPONSE_MESSAGE }] = recordset;
-
-    const logPayload = {
-      query: `INSERT INTO DBO.POST_VIEW FOR POST ID: ${postId}`,
-      responseMessage: RESPONSE_MESSAGE,
-      user: ''
-    };
-    await _insertNewLog(logPayload);
-
-    if (RESPONSE_MESSAGE === 'SUCCESS') {
-      resp.status = 'true';
-    }
-
-    return resp;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+// eslint-disable-next-line no-promise-executor-return
 const sleep = async (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 const updatePostStatisticScheduler = async () => {
@@ -1077,14 +1086,17 @@ const updatePostStatisticScheduler = async () => {
     }
     console.log('ini', postsStatistics);
 
+    // eslint-disable-next-line no-return-await
     postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
 
     resp.status = 'true';
     resp.message = { ...recordset[0] };
 
+    // eslint-disable-next-line consistent-return
     return resp;
   } catch (err) {
     console.error(err);
+    // eslint-disable-next-line consistent-return
     return resp;
   }
 };
@@ -1107,6 +1119,7 @@ const getPostStatisticByPostId = async (postId) => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1128,6 +1141,7 @@ const getContractRenewalList = async (postId) => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1142,13 +1156,15 @@ const getBriefDetail = async (briefId) => {
       .query(QUERIES.GET_BRIEF_DETAIL);
     console.log(result.recordset);
 
-    const { recordset } = result;
     resp.status = 'true';
-    resp.message = recordset[0];
+    const { recordset } = result;
+    const [firstRecord] = recordset;
+    resp.message = firstRecord;
 
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1178,6 +1194,7 @@ const getPostViewByManagerId = async (managerId) => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1217,6 +1234,7 @@ const getOverviewData = async (params, id) => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1254,6 +1272,7 @@ const getCostAndSlotOverview = async () => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -1283,6 +1302,8 @@ const postReminderScheduler = async () => {
       await WhatsappConnector.sendMessage(message);
       console.log('send message to phone', message.number);
     });
+
+    return true;
   } catch (err) {
     console.error(err);
     return resp;
@@ -1315,6 +1336,8 @@ const contractReminderScheduler = async () => {
       await WhatsappConnector.sendMessage(message);
       console.log('send message to phone', message.number);
     });
+
+    return true;
   } catch (err) {
     console.error(err);
     return resp;
@@ -1339,6 +1362,7 @@ const getKolListByBrief = async (briefId) => {
     return resp;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
