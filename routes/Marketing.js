@@ -1,56 +1,54 @@
-const axios = require("axios");
-const nodemailer = require("nodemailer");
-const fs = require("fs");
+const axios = require('axios');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
 
-const { poolPromise } = require("../utility/database");
-const { sendToTheQueue } = require("../utility/rabbitmq");
-const { PYTHON_URL } = require("../config");
-const { QUERIES } = require("../queries/index");
-const PythonConnector = require("../connectors/PythonConnector");
-const WhatsappConnector = require("../connectors/WhatsappConnector");
-const GenerateFile = require("./GenerateFile");
-const { upload } = require("../utility/multer");
+const { poolPromise } = require('../utility/database');
+const { sendToTheQueue } = require('../utility/rabbitmq');
+const { PYTHON_URL } = require('../config');
+const { QUERIES } = require('../queries/index');
+const PythonConnector = require('../connectors/PythonConnector');
+const WhatsappConnector = require('../connectors/WhatsappConnector');
+const GenerateFile = require('./GenerateFile');
 const {
   getPostReminderTemplate,
   getContractReminderTemplate,
-  getBroadcastBriefTemplate,
-} = require("../message-template");
-const { convertDate, DateMode, convertToIdr } = require("../utils");
+  getBroadcastBriefTemplate
+} = require('../message-template');
+const { convertDate, DateMode, convertToIdr } = require('../utils');
 
 const sendEmail = async (receiverEmail, subject, content) => {
-  let response = "failed";
+  let response = 'failed';
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: 'gmail',
     auth: {
-      user: "jiera.fullstack@gmail.com",
-      pass: "aqqnedeocsegjhlp",
-    },
+      user: 'jiera.fullstack@gmail.com',
+      pass: 'aqqnedeocsegjhlp'
+    }
   });
 
   await transporter.verify().then(console.log).catch(console.error);
   await transporter
     .sendMail({
-      from: '"Jiera Fullstack" <jiera.fullstack@gmail.com>', // sender address
-      to: receiverEmail, //"receiverone@gmail.com, receivertwo@outlook.com", // list of receivers
-      subject: subject, //"Medium @edigleyssonsilva ✔", // Subject line
-      text: content, //"There is a new article. It's about sending emails, check it out!", // plain text body
-      //html: "<b>There is a new article. It's about sending emails, check it out!</b>", // html body
+      from: '"Jiera Fullstack" <jiera.fullstack@gmail.com>',
+      to: receiverEmail,
+      subject,
+      text: content
     })
     .then((info) => {
-      console.log("transporter send email", { info });
-      response = "success";
+      console.log('transporter send email', { info });
+      response = 'success';
     })
     .catch(console.error);
   return response;
 };
 
 const sendMessageToQueue = async (req) => {
-  let resp = { status: "false" };
-  let queue_name = req.Queue;
-  let message = req.Message;
+  const resp = { status: 'false' };
+  const queueName = req.Queue;
+  const message = req.Message;
   try {
-    let status = await sendToTheQueue(queue_name, message);
-    if (status) resp.status = "true";
+    const status = await sendToTheQueue(queueName, message);
+    if (status) resp.status = 'true';
   } catch (err) {
     console.error(err);
   }
@@ -58,15 +56,15 @@ const sendMessageToQueue = async (req) => {
 };
 
 const procToSendEmail = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
-    let receiverEmail = req.receiverEmail;
-    let subject = req.subject;
-    let content = req.content;
-    let response = await sendEmail(receiverEmail, subject, content);
-    console.log("sendEmail response:", response);
-    if (response == "success") {
-      resp.status = "true";
+    const { receiverEmail } = req;
+    const { subject } = req;
+    const { content } = req;
+    const response = await sendEmail(receiverEmail, subject, content);
+    console.log('sendEmail response:', response);
+    if (response === 'success') {
+      resp.status = 'true';
     }
     return resp;
   } catch (err) {
@@ -77,16 +75,16 @@ const procToSendEmail = async (req) => {
 
 const replaceToIndonesianPhoneNumberFormat = (phoneNumber) => {
   const phoneNumberFirstDigit = phoneNumber[0];
-  const phoneNumberFirstTwoDigit = phoneNumber.substring(0, 3);
-  const indonesianCodePhoneNumber = "62";
+  const phoneNumberFirstThreeDigit = phoneNumber.substring(0, 3);
+  const indonesianCodePhoneNumber = '62';
 
-  if (phoneNumberFirstDigit === "0") {
+  if (phoneNumberFirstDigit === '0') {
     return phoneNumber.replace(
       phoneNumberFirstDigit,
       indonesianCodePhoneNumber
     );
   }
-  if (phoneNumberFirstThreeDigit === "+62") {
+  if (phoneNumberFirstThreeDigit === '+62') {
     return phoneNumber.replace(
       phoneNumberFirstThreeDigit,
       indonesianCodePhoneNumber
@@ -96,54 +94,54 @@ const replaceToIndonesianPhoneNumberFormat = (phoneNumber) => {
 };
 
 const insertNewKOL = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
-    let JenisEndorse = req.JenisEndorse;
-    let JenisPlatform = req.JenisPlatform;
-    let KategoriKOL = req.KategoriKOL;
-    let NamaKOL = req.NamaKOL;
-    let UsernameKOL = req.UsernameKOL;
-    let NoWhatsapp = replaceToIndonesianPhoneNumberFormat(req.NoWhatsapp);
-    let AlamatKOL = req.AlamatKOL;
-    let NorekKOL = req.NorekKOL;
-    let KTP = req.KTP;
-    let Bank = req.Bank;
-    let User = req.User;
+    const { JenisEndorse } = req;
+    const { JenisPlatform } = req;
+    const { KategoriKOL } = req;
+    const { NamaKOL } = req;
+    const { UsernameKOL } = req;
+    const NoWhatsapp = replaceToIndonesianPhoneNumberFormat(req.NoWhatsapp);
+    const { AlamatKOL } = req;
+    const { NorekKOL } = req;
+    const { KTP } = req;
+    const { Bank } = req;
+    const { User } = req;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("JenisEndorse", JenisEndorse)
-      .input("JenisPlatform", JenisPlatform)
-      .input("KategoriKOL", KategoriKOL)
-      .input("NamaKOL", NamaKOL)
-      .input("UsernameKOL", UsernameKOL)
-      .input("NoWhatsapp", NoWhatsapp)
-      .input("AlamatKOL", AlamatKOL)
-      .input("Norek", NorekKOL)
-      .input("KTP", KTP)
-      .input("Bank", Bank)
-      .input("User", User)
-      .execute("[MARKETING].[dbo].[SP_InsertNewKOL]");
+      .input('JenisEndorse', JenisEndorse)
+      .input('JenisPlatform', JenisPlatform)
+      .input('KategoriKOL', KategoriKOL)
+      .input('NamaKOL', NamaKOL)
+      .input('UsernameKOL', UsernameKOL)
+      .input('NoWhatsapp', NoWhatsapp)
+      .input('AlamatKOL', AlamatKOL)
+      .input('Norek', NorekKOL)
+      .input('KTP', KTP)
+      .input('Bank', Bank)
+      .input('User', User)
+      .execute('[MARKETING].[dbo].[SP_InsertNewKOL]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
-      if (result.recordset.length == 1) {
-        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-            resp.status = "true";
-            resp.kolId = result.recordset[0]["KOL_ID"];
+    if (typeof result.recordset !== 'undefined') {
+      if (result.recordset.length === 1) {
+        if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+          if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
+            resp.status = 'true';
+            resp.kolId = result.recordset[0].KOL_ID;
           } else {
-            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+            resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
         } else {
-          resp.message = "Unknown Error 3";
+          resp.message = 'Unknown Error 3';
         }
       } else {
-        resp.message = "Unknown Error 2";
+        resp.message = 'Unknown Error 2';
       }
     } else {
-      resp.message = "Unknown Error 1";
+      resp.message = 'Unknown Error 1';
     }
 
     return resp;
@@ -153,18 +151,18 @@ const insertNewKOL = async (req) => {
   }
 };
 
-const GetFormatListKol = async (menu) => {
-  let resp = { status: "false" };
+const getFormatListKol = async (menu) => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("MENU", menu)
-      .execute("[MARKETING].[dbo].[SP_GetFormatListKol]");
+      .input('MENU', menu)
+      .execute('[MARKETING].[dbo].[SP_GetFormatListKol]');
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
+        resp.status = 'true';
         resp.message = result.recordset;
       }
     }
@@ -175,43 +173,19 @@ const GetFormatListKol = async (menu) => {
   }
 };
 
-const GetListKol = async () => {
-  let resp = { status: "false" };
+const getListKol = async () => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListKol]");
+      .execute('[MARKETING].[dbo].[SP_GetListKol]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
-        resp.message = result.recordset;
-      }
-    }
-
-    return resp;
-  } catch (err) {
-    console.error(err);
-    return resp;
-  }
-};
-
-const GetALLKolName = async () => {
-  let resp = { status: "false" };
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool
-      .request()
-      .execute("[MARKETING].[dbo].[SP_GetAllKolName]");
-    console.log(result.recordset);
-
-    if (typeof result.recordset !== "undefined") {
-      if (result.recordset.length >= 1) {
-        resp.status = "true";
+        resp.status = 'true';
         resp.message = result.recordset;
       }
     }
@@ -223,21 +197,20 @@ const GetALLKolName = async () => {
   }
 };
 
-const GetKolDetailByID = async (req) => {
-  let resp = { status: "false" };
+const getALLKolName = async () => {
+  const resp = { status: 'false' };
   try {
-    let Id = req.Id;
     const pool = await poolPromise;
+
     const result = await pool
       .request()
-      .input("ID", Id)
-      .execute("[MARKETING].[dbo].[SP_GetDetailKolByID]");
+      .execute('[MARKETING].[dbo].[SP_GetAllKolName]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
-        resp.message = result.recordset[0];
+        resp.status = 'true';
+        resp.message = result.recordset;
       }
     }
 
@@ -248,13 +221,40 @@ const GetKolDetailByID = async (req) => {
   }
 };
 
-const GetKontrakDetailByID = async (req) => {
-  let resp = { status: "false" };
+const getKolDetailByID = async (req) => {
+  const resp = { status: 'false' };
   try {
-    let id = req.Id;
+    const { Id } = req;
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('ID', Id)
+      .execute('[MARKETING].[dbo].[SP_GetDetailKolByID]');
+    console.log(result.recordset);
+
+    if (typeof result.recordset !== 'undefined') {
+      if (result.recordset.length >= 1) {
+        resp.status = 'true';
+        const { recordset } = result;
+        const [firstRecord] = recordset;
+        resp.message = firstRecord;
+      }
+    }
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const getKontrakDetailByID = async (req) => {
+  const resp = { status: 'false' };
+  try {
+    const id = req.Id;
     const pool = await poolPromise;
     const query = QUERIES.GET_CONTRACT_DETAIL_QUERY;
-    const result = await pool.request().input("contractId", id).query(query);
+    const result = await pool.request().input('contractId', id).query(query);
     console.log(result.recordset);
 
     const numberOfSlotQuery = `SELECT COUNT([MARKETING].dbo.Post.[Post Id]) as JumlahPost
@@ -265,7 +265,7 @@ const GetKontrakDetailByID = async (req) => {
     const postNumber = JumlahPost + 1;
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = { ...recordset[0], postNumber };
 
     return resp;
@@ -275,21 +275,21 @@ const GetKontrakDetailByID = async (req) => {
   }
 };
 
-const GetSubMediaById = async (req) => {
-  let resp = { status: "false" };
+const getSubMediaById = async (req) => {
+  const resp = { status: 'false' };
   try {
-    let Id = req.Id;
+    const { Id } = req;
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("ID", Id)
-      .execute("[MARKETING].[dbo].[SP_GetSubMediaByID]");
+      .input('ID', Id)
+      .execute('[MARKETING].[dbo].[SP_GetSubMediaByID]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
-        let listArr = [];
+        resp.status = 'true';
+        const listArr = [];
         result.recordset.forEach((element) => {
           listArr.push(element.SUB_MEDIA);
         });
@@ -305,25 +305,25 @@ const GetSubMediaById = async (req) => {
 };
 
 const checkFileStatus = async (req) => {
-  let resp = { status: "false" };
-  console.log("tes:", req);
+  const resp = { status: 'false' };
+  console.log('tes:', req);
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("FileId", req.FileId)
-      .execute("[MARKETING].[dbo].[SP_CheckStatusFile]");
-    console.log("SP_CheckStatusFile:", result.recordset);
+      .input('FileId', req.FileId)
+      .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
+    console.log('SP_CheckStatusFile:', result.recordset);
 
     const { FILE_NAME: pathToFile } = result.recordset[0];
 
     if (fs.existsSync(pathToFile)) {
       resp.filename = pathToFile;
-      resp.status = "true";
+      resp.status = 'true';
       return resp;
     }
 
-    console.log("gaada");
+    console.log('gaada');
     await _regenerateContract(req.FileId);
   } catch (err) {
     console.error(err);
@@ -337,7 +337,7 @@ const _regenerateContract = async (contractId) => {
     const query = QUERIES.GET_CONTRACT_DETAIL_QUERY;
     const result = await pool
       .request()
-      .input("contractId", contractId)
+      .input('contractId', contractId)
       .query(query);
     // console.log(result.recordset);
 
@@ -352,19 +352,19 @@ const _regenerateContract = async (contractId) => {
       kolAddress,
       kolBank,
       kolRekening,
-      DP,
+      DP
     } = result.recordset[0];
 
-    const BIAYA = result.recordset[0]["Total Kerjasama"];
-    const contractStartDate = result.recordset[0]["Masa Kontrak Mulai"];
-    const contractEndDate = result.recordset[0]["Masa Kontrak Akhir"];
-    const contractSignedDate = result.recordset[0]["Tgl Kontrak"];
-    const SLOT = result.recordset[0]["Booking Slot"];
-    const convertedSignedDate = new Date(contractSignedDate)
+    const BIAYA = result.recordset[0]['Total Kerjasama'];
+    const contractStartDate = result.recordset[0]['Masa Kontrak Mulai'];
+    const contractEndDate = result.recordset[0]['Masa Kontrak Akhir'];
+    const contractSignedDate = result.recordset[0]['Tgl Kontrak'];
+    const SLOT = result.recordset[0]['Booking Slot'];
+    const convertedSignedDate = new Date(contractSignedDate);
 
     const payload = {
-      ID : ("00" + contractId).slice(-3),
-      BULAN:  ("0" + (convertedSignedDate.getMonth() + 1)).slice(-2),
+      ID: (`00${contractId}`).slice(-3),
+      BULAN: (`0${convertedSignedDate.getMonth() + 1}`).slice(-2),
       TAHUN: convertedSignedDate.getFullYear(),
       DATE_NOW: convertDate(contractSignedDate, DateMode.DDDDMMYYY_INDONESIAN),
       MANAGER_NAME: managerName,
@@ -374,103 +374,105 @@ const _regenerateContract = async (contractId) => {
       KOL_KTP: kolKtp,
       KOL_ALAMAT: kolAddress,
       PLATFORM: platform,
-      USERNAME:username,
+      USERNAME: username,
       TANGGAL_AWAL: convertDate(contractStartDate, DateMode.DDMMYYYY_INDONESIAN),
       TANGGAL_AKHIR: convertDate(contractEndDate, DateMode.DDMMYYYY_INDONESIAN),
       BIAYA: convertToIdr(BIAYA),
-      DP_Percentage: DP+'%',
-      Sisa_DP: convertToIdr(BIAYA-(BIAYA*DP/100)),
+      DP_Percentage: `${DP}%`,
+      Sisa_DP: convertToIdr(BIAYA - ((BIAYA * DP) / 100)),
       NOREK: kolRekening,
       BANK: kolBank,
       SLOT,
-      DP: convertToIdr(BIAYA*DP/100)
+      DP: convertToIdr((BIAYA * DP) / 100)
     };
 
-    console.log(payload)
+    console.log(payload);
 
-    await GenerateFile.generateFile(payload)
+    await GenerateFile.generateFile(payload);
   } catch (err) {
     console.error(err);
-    return resp;
+    return err;
   }
 };
 
 const insertNewKontrak = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
-    let Id = req.Id;
-    let SubMedia = req.SubMedia;
-    let BookingSlot = req.BookingSlot;
-    let BiayaKerjaSama = req.BiayaKerjaSama;
-    let Manager = req.Manager;
-    let TanggalAwalKerjaSama = req.TanggalAwalKerjaSama;
-    let TanggalAkhirKerjaSama = req.TanggalAkhirKerjaSama;
-    let User = req.User;
-    let DP = req.DP;
+    const { Id } = req;
+    const { SubMedia } = req;
+    const { BookingSlot } = req;
+    const { BiayaKerjaSama } = req;
+    const { Manager } = req;
+    const { TanggalAwalKerjaSama } = req;
+    const { TanggalAkhirKerjaSama } = req;
+    const { User } = req;
+    const { DP } = req;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("id", Id)
-      .input("subMedia", SubMedia)
-      .input("bookingSlot", BookingSlot)
-      .input("biayaKerjaSama", BiayaKerjaSama)
-      .input("DP", DP)
-      .input("manager", Manager)
-      .input("tanggalAwalKerjaSama", TanggalAwalKerjaSama)
-      .input("tanggalAkhirKerjaSama", TanggalAkhirKerjaSama)
-      .input("User", User)
-      .execute("[MARKETING].[dbo].[SP_InsertNewKontrak]");
+      .input('id', Id)
+      .input('subMedia', SubMedia)
+      .input('bookingSlot', BookingSlot)
+      .input('biayaKerjaSama', BiayaKerjaSama)
+      .input('DP', DP)
+      .input('manager', Manager)
+      .input('tanggalAwalKerjaSama', TanggalAwalKerjaSama)
+      .input('tanggalAkhirKerjaSama', TanggalAkhirKerjaSama)
+      .input('User', User)
+      .execute('[MARKETING].[dbo].[SP_InsertNewKontrak]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length == 1) {
-        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-            resp.status = "true";
-            resp.kontrakId = result.recordset[0]["KONTRAK_ID"];
-            resp.kontrakKe = result.recordset[0]["KONTRAK_KE"];
-            resp.FILE_ID = result.recordset[0]["FILE_ID"];
-            req.FileId = result.recordset[0]["FILE_ID"];
-            let status = await sendToTheQueue("generate_file_contract", req);
+        if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+            resp.status = 'true';
+            resp.kontrakId = result.recordset[0].KONTRAK_ID;
+            resp.kontrakKe = result.recordset[0].KONTRAK_KE;
+            resp.FILE_ID = result.recordset[0].FILE_ID;
+            req.FileId = result.recordset[0].FILE_ID;
+            const status = await sendToTheQueue('generate_file_contract', req);
             console.log(
-              "sendToTheQueue, queue:generate_file_contract, msg : ",
+              'sendToTheQueue, queue:generate_file_contract, msg : ',
               req.toString(),
-              ",status:",
+              ',status:',
               status
             );
 
             let fileStatus = false;
             let count = 0;
-            let maxIterator = 5;
+            const maxIterator = 5;
             while (!fileStatus && count < maxIterator) {
+              // eslint-disable-next-line no-await-in-loop
               const result2 = await pool
                 .request()
-                .input("FileId", req.FileId)
-                .execute("[MARKETING].[dbo].[SP_CheckStatusFile]");
-              console.log("SP_CheckStatusFile:", result2.recordset);
+                .input('FileId', req.FileId)
+                .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
+              console.log('SP_CheckStatusFile:', result2.recordset);
               if (result2.recordset.length == 1) {
-                if (result2.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-                  if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
+                if (result2.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+                  if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
                     fileStatus = true;
-                    resp.filename = result2.recordset[0]["FILE_NAME"];
+                    resp.filename = result2.recordset[0].FILE_NAME;
                   }
                 }
               }
+              // eslint-disable-next-line no-await-in-loop, no-promise-executor-return
               await new Promise((resolve) => setTimeout(resolve, 2000));
-              count = count + 1;
+              count += 1;
             }
           } else {
-            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+            resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
         } else {
-          resp.message = "Unknown Error 3";
+          resp.message = 'Unknown Error 3';
         }
       } else {
-        resp.message = "Unknown Error 2";
+        resp.message = 'Unknown Error 2';
       }
     } else {
-      resp.message = "Unknown Error 1";
+      resp.message = 'Unknown Error 1';
     }
 
     return resp;
@@ -480,19 +482,19 @@ const insertNewKontrak = async (req) => {
   }
 };
 
-const GetListKontrak = async () => {
-  let resp = { status: "false" };
+const getListKontrak = async () => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListKontrak]");
+      .execute('[MARKETING].[dbo].[SP_GetListKontrak]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
+        resp.status = 'true';
         resp.message = result.recordset;
       }
     }
@@ -504,14 +506,14 @@ const GetListKontrak = async () => {
   }
 };
 
-const ExecSPWithoutInput = async (req) => {
-  let resp = { status: "false" };
+const execSPWithoutInput = async (req) => {
+  const resp = { status: 'false' };
   try {
-    let SPName = req.SPName;
+    const { SPName } = req;
     const pool = await poolPromise;
 
     const result = await pool.request().execute(SPName);
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = result.recordset;
 
     return resp;
@@ -521,11 +523,11 @@ const ExecSPWithoutInput = async (req) => {
   }
 };
 
-const ExecSPWithInput = async (req) => {
-  let resp = { status: "false" };
+const execSPWithInput = async (req) => {
+  const resp = { status: 'false' };
   try {
-    let SPName = req.SPName;
-    let input = req.Input;
+    const { SPName } = req;
+    const input = req.Input;
     const pool = await poolPromise;
 
     let request = pool.request();
@@ -537,7 +539,7 @@ const ExecSPWithInput = async (req) => {
     const result = await request.execute(SPName);
     console.log(result.recordset);
     if (result.recordset.length >= 1) {
-      resp.status = "true";
+      resp.status = 'true';
       resp.message = result.recordset;
     }
     return resp;
@@ -547,20 +549,20 @@ const ExecSPWithInput = async (req) => {
   }
 };
 
-const GetListKontrakIteration = async () => {
-  let resp = { status: "false" };
+const getListKontrakIteration = async () => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListKontrakIteration]");
+      .execute('[MARKETING].[dbo].[SP_GetListKontrakIteration]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
-        console.log("halo", result.recordset);
+        resp.status = 'true';
+        console.log('halo', result.recordset);
         resp.message = result.recordset;
       }
     }
@@ -573,44 +575,44 @@ const GetListKontrakIteration = async () => {
 };
 
 const insertNewBrief = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
-    let Tema = req.Tema;
-    let Konsep = req.Konsep;
-    let Script = req.Script;
-    let RefLink = req.RefLink;
-    let ManagerId = req.ManagerId;
-    let User = req.User;
+    const { Tema } = req;
+    const { Konsep } = req;
+    const { Script } = req;
+    const { RefLink } = req;
+    const { ManagerId } = req;
+    const { User } = req;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("tema", Tema)
-      .input("konsep", Konsep)
-      .input("script", Script)
-      .input("linkReff", RefLink)
-      .input("managerId", ManagerId)
-      .input("User", User)
-      .execute("[MARKETING].[dbo].[SP_InsertNewBrief]");
+      .input('tema', Tema)
+      .input('konsep', Konsep)
+      .input('script', Script)
+      .input('linkReff', RefLink)
+      .input('managerId', ManagerId)
+      .input('User', User)
+      .execute('[MARKETING].[dbo].[SP_InsertNewBrief]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length == 1) {
-        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-            resp.status = "true";
-            resp.briefCode = result.recordset[0]["BRIEF_CODE"];
+        if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+            resp.status = 'true';
+            resp.briefCode = result.recordset[0].BRIEF_CODE;
           } else {
-            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+            resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
         } else {
-          resp.message = "Unknown Error 3";
+          resp.message = 'Unknown Error 3';
         }
       } else {
-        resp.message = "Unknown Error 2";
+        resp.message = 'Unknown Error 2';
       }
     } else {
-      resp.message = "Unknown Error 1";
+      resp.message = 'Unknown Error 1';
     }
 
     return resp;
@@ -620,19 +622,19 @@ const insertNewBrief = async (req) => {
   }
 };
 
-const GetListBrief = async () => {
-  let resp = { status: "false" };
+const getListBrief = async () => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListBrief]");
+      .execute('[MARKETING].[dbo].[SP_GetListBrief]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
+        resp.status = 'true';
         resp.message = result.recordset;
       }
     }
@@ -645,82 +647,81 @@ const GetListBrief = async () => {
 };
 
 const insertNewManager = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
-    let ManagerName = req.ManagerName;
-    let NoWhatsApp = req.NoWhatsApp;
-    let Email = req.Email;
-    let Alias = req.Alias.toUpperCase();
-    let Roles = req.Roles;
-    let NoKTP = req.NoKTP;
-    let User = req.User;
-    let CompanyId = req.User.split("_")[0].replace('"', "");
+    const { ManagerName } = req;
+    const { NoWhatsApp } = req;
+    const { Email } = req;
+    const Alias = req.Alias.toUpperCase();
+    const { Roles } = req;
+    const { NoKTP } = req;
+    const { User } = req;
+    const CompanyId = req.User.split('_')[0].replace('"', '');
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("ManagerName", ManagerName)
-      .input("NoWhatsApp", NoWhatsApp)
-      .input("Email", Email)
-      .input("Alias", Alias)
-      .input("Roles", Roles)
-      .input("NoKTP", NoKTP)
-      .input("User", User)
-      .execute("[MARKETING].[dbo].[SP_InsertNewManager]");
-    console.log("[SP_InsertNewManager] result:", result.recordset);
+      .input('ManagerName', ManagerName)
+      .input('NoWhatsApp', NoWhatsApp)
+      .input('Email', Email)
+      .input('Alias', Alias)
+      .input('Roles', Roles)
+      .input('NoKTP', NoKTP)
+      .input('User', User)
+      .execute('[MARKETING].[dbo].[SP_InsertNewManager]');
+    console.log('[SP_InsertNewManager] result:', result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length == 1) {
-        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-            let managerId = result.recordset[0]["MANAGER_ID"];
+        if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+            const managerId = result.recordset[0].MANAGER_ID;
 
             const result2 = await pool
               .request()
-              .input("COMPANY_ID", CompanyId)
-              .input("Alias", Alias)
-              .input("Email", Email)
-              .input("LevelId", "MK")
-              .input("User", User)
-              .execute("[MARKETING].[dbo].[SP_CreateNewUser]");
-            console.log("[SP_CreateNewUser] result:", result2.recordset);
-            if (typeof result2.recordset !== "undefined") {
-              //notify to WA & Email
-              if (result2.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-                if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-                  let subject = "New Registration ERP BY JIERA ACCOUNT";
-                  let content =
-                    "Hi, " +
-                    ManagerName +
-                    " \n" +
-                    "you are registered on ERP BY JIERA Website (erpbyjiera.com) \n" +
-                    "your User: " +
-                    CompanyId +
-                    "_" +
-                    Alias +
-                    "\n" +
-                    "your Password: " +
-                    "12345678" +
-                    " \n" +
-                    "Please use your account wisely";
-                  let respEmail = await sendEmail(Email, subject, content);
-                  console.log("respEmail:", respEmail);
+              .input('COMPANY_ID', CompanyId)
+              .input('Alias', Alias)
+              .input('Email', Email)
+              .input('LevelId', 'MK')
+              .input('User', User)
+              .execute('[MARKETING].[dbo].[SP_CreateNewUser]');
+            console.log('[SP_CreateNewUser] result:', result2.recordset);
+            if (typeof result2.recordset !== 'undefined') {
+              // notify to WA & Email
+              if (result2.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+                if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+                  const subject = 'New Registration ERP BY JIERA ACCOUNT';
+                  const content = `Hi, ${
+                    ManagerName
+                  } \n`
+                    + 'you are registered on ERP BY JIERA Website (erpbyjiera.com) \n'
+                    + `your User: ${
+                      CompanyId
+                    }_${
+                      Alias
+                    }\n`
+                    + 'your Password: '
+                    + '12345678'
+                    + ' \n'
+                    + 'Please use your account wisely';
+                  const respEmail = await sendEmail(Email, subject, content);
+                  console.log('respEmail:', respEmail);
                 }
               }
             }
             resp.managerId = managerId;
-            resp.status = "true";
+            resp.status = 'true';
           } else {
-            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+            resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
         } else {
-          resp.message = "Unknown Error 3";
+          resp.message = 'Unknown Error 3';
         }
       } else {
-        resp.message = "Unknown Error 2";
+        resp.message = 'Unknown Error 2';
       }
     } else {
-      resp.message = "Unknown Error 1";
+      resp.message = 'Unknown Error 1';
     }
 
     return resp;
@@ -730,19 +731,19 @@ const insertNewManager = async (req) => {
   }
 };
 
-const GetListManager = async () => {
-  let resp = { status: "false" };
+const getListManager = async () => {
+  const resp = { status: 'false' };
   try {
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListManager]");
+      .execute('[MARKETING].[dbo].[SP_GetListManager]');
     console.log(result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
-        resp.status = "true";
+        resp.status = 'true';
         resp.message = result.recordset;
       }
     }
@@ -755,40 +756,42 @@ const GetListManager = async () => {
 };
 
 const insertNewPost = async (req) => {
-  let resp = { status: "false" };
-  console.log("ini req", req);
+  const resp = { status: 'false' };
+  console.log('ini req', req);
   try {
-    const { KontrakId, ManagerId, BriefId, TglPostKontrak, User } = req;
+    const {
+      KontrakId, ManagerId, BriefId, TglPostKontrak, User
+    } = req;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("KontrakId", KontrakId)
-      .input("ManagerId", ManagerId)
-      .input("BriefId", BriefId)
-      .input("TglPostKontrak", TglPostKontrak)
-      .input("User", User)
-      .execute("[MARKETING].[dbo].[SP_InsertNewPost]");
-    console.log("[SP_InsertNewPost] result:", result.recordset);
+      .input('KontrakId', KontrakId)
+      .input('ManagerId', ManagerId)
+      .input('BriefId', BriefId)
+      .input('TglPostKontrak', TglPostKontrak)
+      .input('User', User)
+      .execute('[MARKETING].[dbo].[SP_InsertNewPost]');
+    console.log('[SP_InsertNewPost] result:', result.recordset);
 
-    if (typeof result.recordset !== "undefined") {
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length == 1) {
-        if (result.recordset[0]["RESPONSE_MESSAGE"] !== "undefined") {
-          if (result.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-            let postId = result.recordset[0]["POST_ID"];
+        if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
+          if (result.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+            const postId = result.recordset[0].POST_ID;
             resp.postId = postId;
-            resp.status = "true";
+            resp.status = 'true';
           } else {
-            resp.message = result.recordset[0]["RESPONSE_MESSAGE"];
+            resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
         } else {
-          resp.message = "Unknown Error 3";
+          resp.message = 'Unknown Error 3';
         }
       } else {
-        resp.message = "Unknown Error 2";
+        resp.message = 'Unknown Error 2';
       }
     } else {
-      resp.message = "Unknown Error 1";
+      resp.message = 'Unknown Error 1';
     }
 
     return resp;
@@ -798,72 +801,72 @@ const insertNewPost = async (req) => {
   }
 };
 
-const UpdatePostStatsById = async (req) => {
-  let resp = { status: "false" };
+const updatePostStatsById = async (req) => {
+  const resp = { status: 'false' };
   try {
-    let Id = req.Id;
+    const { Id } = req;
     const pool = await poolPromise;
 
     const result = await pool
       .request()
-      .input("Id", Id)
-      .execute("[MARKETING].[dbo].[SP_GetPostDetailById]");
-    if (typeof result.recordset !== "undefined") {
+      .input('Id', Id)
+      .execute('[MARKETING].[dbo].[SP_GetPostDetailById]');
+    if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length == 1) {
-        let linkPost = result.recordset[0]["Link Post"];
-        let data = JSON.stringify({
-          video_url: linkPost,
+        const linkPost = result.recordset[0]['Link Post'];
+        const data = JSON.stringify({
+          video_url: linkPost
         });
         try {
           const res = await axios.post(
-            PYTHON_URL + "/getTiktokVideoWithUserStats/",
+            `${PYTHON_URL}/getTiktokVideoWithUserStats/`,
             data,
             {
               headers: {
-                "Content-Type": "application/json",
-              },
+                'Content-Type': 'application/json'
+              }
             }
           );
 
-          if (res.data.data !== "undefined") {
-            let data = res.data.data;
-            console.log("data:", data);
-            let followerCount = data.user.followerCount;
-            let viewCount = data.video.viewCount;
-            let likeCount = data.video.likeCount;
-            let shareCount = data.video.shareCount;
-            let commentCount = data.video.shareCount;
+          if (res.data.data !== 'undefined') {
+            const { data } = res.data;
+            console.log('data:', data);
+            const { followerCount } = data.user;
+            const { viewCount } = data.video;
+            const { likeCount } = data.video;
+            const { shareCount } = data.video;
+            const commentCount = data.video.shareCount;
 
             const result2 = await pool
               .request()
-              .input("Id", Id)
-              .input("followerCount", followerCount)
-              .input("viewCount", viewCount)
-              .input("likeCount", likeCount)
-              .input("shareCount", shareCount)
-              .input("commentCount", commentCount)
-              .execute("[MARKETING].[dbo].[SP_UpdatePostStatsById]");
-            if (typeof result2.recordset !== "undefined") {
-              console.log("SP_UpdatePostStatsById", result2.recordset);
-              if (result2.recordset[0]["RESPONSE_MESSAGE"] == "SUCCESS") {
-                resp.status = "true";
-                resp.message = "success";
+              .input('Id', Id)
+              .input('followerCount', followerCount)
+              .input('viewCount', viewCount)
+              .input('likeCount', likeCount)
+              .input('shareCount', shareCount)
+              .input('commentCount', commentCount)
+              .execute('[MARKETING].[dbo].[SP_UpdatePostStatsById]');
+            if (typeof result2.recordset !== 'undefined') {
+              console.log('SP_UpdatePostStatsById', result2.recordset);
+              if (result2.recordset[0].RESPONSE_MESSAGE == 'SUCCESS') {
+                resp.status = 'true';
+                resp.message = 'success';
               } else {
-                resp.message = "fail to update post stats";
+                resp.message = 'fail to update post stats';
               }
             }
           } else {
-            resp.message = "fail get video stats";
+            resp.message = 'fail get video stats';
           }
         } catch (err) {
           console.error(err);
-          resp.message = "fail get video stats";
+          resp.message = 'fail get video stats';
         }
       } else {
-        resp.message = "Can not found post id";
+        resp.message = 'Can not found post id';
       }
     } else {
-      resp.message = "Can not found post id";
+      resp.message = 'Can not found post id';
     }
     return resp;
   } catch (err) {
@@ -873,16 +876,16 @@ const UpdatePostStatsById = async (req) => {
 };
 
 const getPostDetail = async (req) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   try {
     const { id } = req;
     const pool = await poolPromise;
     const query = QUERIES.GET_POST_DETAIL_QUERY;
-    const result = await pool.request().input("postId", id).query(query);
+    const result = await pool.request().input('postId', id).query(query);
     console.log(result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = { ...recordset[0] };
 
     return resp;
@@ -899,7 +902,7 @@ const _getDayDifference = (early, later) => {
 };
 
 const updatePostById = async (id, payload) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const { linkPost, deadlineDate, uploadDate } = payload;
   const today = new Date();
   const todayGMT = today.setHours(today.getHours() + 7);
@@ -912,27 +915,29 @@ const updatePostById = async (id, payload) => {
     const query = QUERIES.UPDATE_POST_QUERY;
     const result = await pool
       .request()
-      .input("postId", id)
-      .input("linkPost", linkPost)
-      .input("deadlineDate", deadlineDate)
-      .input("uploadDate", uploadDate)
+      .input('postId', id)
+      .input('linkPost', linkPost)
+      .input('deadlineDate', deadlineDate)
+      .input('uploadDate', uploadDate)
       .query(query);
     console.log(result);
 
     const { rowsAffected } = result;
     if (rowsAffected[0] === 1) {
-      resp.status = "true";
+      resp.status = 'true';
     }
 
     if (differenceUploadDateToToday > 0) {
-      console.log("Update post statistic for day 1");
+      console.log('Update post statistic for day 1');
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
       const { message } = fetchedStatistic;
       const {
         user: { followerCount },
-        video: { commentCount, likeCount, shareCount, viewCount },
+        video: {
+          commentCount, likeCount, shareCount, viewCount
+        }
       } = message;
       const postStatistic = {
         followers: followerCount,
@@ -941,7 +946,7 @@ const updatePostById = async (id, payload) => {
         shares: shareCount,
         views: viewCount,
         postId: id,
-        dateDifference: 1,
+        dateDifference: 1
       };
 
       await _insertPostStatistic(postStatistic);
@@ -958,11 +963,11 @@ const _insertNewLog = async (payload) => {
   try {
     const { query, user, responseMessage } = payload;
     const pool = await poolPromise;
-    const result = await pool
+    await pool
       .request()
-      .input("query", query)
-      .input("user", user)
-      .input("responseMessage", responseMessage)
+      .input('query', query)
+      .input('user', user)
+      .input('responseMessage', responseMessage)
       .query(QUERIES.INSERT_NEW_LOG);
   } catch (error) {
     console.log(error);
@@ -970,7 +975,7 @@ const _insertNewLog = async (payload) => {
 };
 
 const _insertPostStatistic = async (payload) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
@@ -981,31 +986,31 @@ const _insertPostStatistic = async (payload) => {
       views,
       comments,
       shares,
-      dateDifference,
+      dateDifference
     } = payload;
     const result = await pool
       .request()
-      .input("postId", postId)
-      .input("followers", followers)
-      .input("likes", likes)
-      .input("views", views)
-      .input("comments", comments)
-      .input("shares", shares)
-      .input("dayNumber", dateDifference)
-      .execute("[MARKETING].[dbo].[SP_UpdatePostStatisticById]");
+      .input('postId', postId)
+      .input('followers', followers)
+      .input('likes', likes)
+      .input('views', views)
+      .input('comments', comments)
+      .input('shares', shares)
+      .input('dayNumber', dateDifference)
+      .execute('[MARKETING].[dbo].[SP_UpdatePostStatisticById]');
 
     const { recordset, recordsets } = result;
     const [{ RESPONSE_MESSAGE }] = recordset;
 
     const logPayload = {
-      query: "INSERT INTO DBO.POST_VIEW FOR POST ID: " + postId,
+      query: `INSERT INTO DBO.POST_VIEW FOR POST ID: ${postId}`,
       responseMessage: RESPONSE_MESSAGE,
-      user: "",
+      user: ''
     };
     await _insertNewLog(logPayload);
 
-    if (RESPONSE_MESSAGE === "SUCCESS") {
-      resp.status = "true";
+    if (RESPONSE_MESSAGE === 'SUCCESS') {
+      resp.status = 'true';
     }
 
     return resp;
@@ -1014,12 +1019,10 @@ const _insertPostStatistic = async (payload) => {
   }
 };
 
-const sleep = async (time) => {
-  return new Promise((resolve) => setTimeout(resolve, time));
-};
+const sleep = async (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 const updatePostStatisticScheduler = async () => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const dayToFetch = [1, 3, 7, 14, 28];
 
   try {
@@ -1028,10 +1031,8 @@ const updatePostStatisticScheduler = async () => {
     const result = await pool.request().query(query);
 
     const { recordset = [] } = result;
-    const postsToBeUpdated = recordset.filter((data) =>
-      dayToFetch.includes(data.dateDifference)
-    );
-    console.log("Posts to Be Updated:", postsToBeUpdated);
+    const postsToBeUpdated = recordset.filter((data) => dayToFetch.includes(data.dateDifference));
+    console.log('Posts to Be Updated:', postsToBeUpdated);
 
     const postsStatistics = [];
     for (const post of postsToBeUpdated) {
@@ -1042,41 +1043,43 @@ const updatePostStatisticScheduler = async () => {
         comments: 0,
         likes: 0,
         shares: 0,
-        views: 0,
+        views: 0
       };
 
       await sleep(1000);
-      console.log("Fetching post statistic");
+      console.log('Fetching post statistic');
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
-      console.log("Fetched Statistic", fetchedStatistic);
+      console.log('Fetched Statistic', fetchedStatistic);
       const { status, message } = fetchedStatistic;
 
-      if (status === "false") {
+      if (status === 'false') {
         postsStatistics.push({ ...mappedInfo, ...emptyPost });
         return;
       }
 
       const {
         user: { followerCount },
-        video: { commentCount, likeCount, shareCount, viewCount },
+        video: {
+          commentCount, likeCount, shareCount, viewCount
+        }
       } = message;
       const postStatistic = {
         followers: followerCount,
         comments: commentCount,
         likes: likeCount,
         shares: shareCount,
-        views: viewCount,
+        views: viewCount
       };
 
       postsStatistics.push({ ...mappedInfo, ...postStatistic });
     }
-    console.log("ini", postsStatistics);
+    console.log('ini', postsStatistics);
 
     postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
 
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = { ...recordset[0] };
 
     return resp;
@@ -1087,18 +1090,18 @@ const updatePostStatisticScheduler = async () => {
 };
 
 const getPostStatisticByPostId = async (postId) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("postId", postId)
+      .input('postId', postId)
       .query(QUERIES.GET_POST_STATISTIC_BY_POST_ID);
-    console.log("halo", result.recordset);
+    console.log('halo', result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = recordset;
 
     return resp;
@@ -1108,18 +1111,18 @@ const getPostStatisticByPostId = async (postId) => {
 };
 
 const getContractRenewalList = async (postId) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("postId", postId)
+      .input('postId', postId)
       .query(QUERIES.GET_CONTRACT_RENEWAL_LIST);
     console.log(result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = recordset;
 
     return resp;
@@ -1129,18 +1132,18 @@ const getContractRenewalList = async (postId) => {
 };
 
 const getBriefDetail = async (briefId) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("briefId", briefId)
+      .input('briefId', briefId)
       .query(QUERIES.GET_BRIEF_DETAIL);
     console.log(result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = recordset[0];
 
     return resp;
@@ -1150,28 +1153,26 @@ const getBriefDetail = async (briefId) => {
 };
 
 const getPostViewByManagerId = async (managerId) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
     const postWithViews = await pool
       .request()
-      .input("managerId", managerId)
+      .input('managerId', managerId)
       .query(QUERIES.GET_POST_VIEW_BY_MANAGER_ID);
     console.log(postWithViews.recordset);
     const postWithNoViews = await pool
       .request()
-      .input("managerId", managerId)
+      .input('managerId', managerId)
       .query(QUERIES.GET_UNEXISTS_POST_VIEW_BY_MANAGER_ID);
     console.log(postWithNoViews.recordset);
 
     const { recordset: withViews } = postWithViews;
     const { recordset: withNoViews } = postWithNoViews;
-    const mappedWithNoViews = withNoViews.map((data) => {
-      return { ...data, views: 0 };
-    });
+    const mappedWithNoViews = withNoViews.map((data) => ({ ...data, views: 0 }));
 
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = [...withViews, ...mappedWithNoViews];
 
     return resp;
@@ -1181,36 +1182,36 @@ const getPostViewByManagerId = async (managerId) => {
 };
 
 const getOverviewData = async (params, id) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const OVERVIEW_OPTIONS = {
     BRIEF: {
-      input: "briefId",
-      query: QUERIES.GET_OVERVIEW_BY_BRIEF_ID,
+      input: 'briefId',
+      query: QUERIES.GET_OVERVIEW_BY_BRIEF_ID
     },
     MANAGER: {
-      input: "managerId",
-      query: QUERIES.GET_OVERVIEW_BY_MANAGER_ID,
+      input: 'managerId',
+      query: QUERIES.GET_OVERVIEW_BY_MANAGER_ID
     },
     KOL_CATEGORY: {
-      input: "kolCategoryId",
-      query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID,
+      input: 'kolCategoryId',
+      query: QUERIES.GET_OVERVIEW_BY_KOL_CATEGORY_ID
     },
     KOL: {
-      input: "kolId",
-      query: QUERIES.GET_OVERVIEW_BY_KOL_ID,
-    },
+      input: 'kolId',
+      query: QUERIES.GET_OVERVIEW_BY_KOL_ID
+    }
   };
 
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input(OVERVIEW_OPTIONS[params]["input"], id)
-      .query(OVERVIEW_OPTIONS[params]["query"]);
+      .input(OVERVIEW_OPTIONS[params].input, id)
+      .query(OVERVIEW_OPTIONS[params].query);
     console.log(result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = recordset;
 
     return resp;
@@ -1220,7 +1221,7 @@ const getOverviewData = async (params, id) => {
 };
 
 const getCostAndSlotOverview = async () => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
@@ -1240,14 +1241,14 @@ const getCostAndSlotOverview = async () => {
     const spentCostData = spentCost[0];
     const remainingCostData = {
       cost: totalCostData.cost - spentCostData.cost,
-      slot: totalCostData.slot - spentCostData.slot,
+      slot: totalCostData.slot - spentCostData.slot
     };
     console.log(remainingCostData);
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = {
       totalCostData,
       spentCostData,
-      remainingCostData,
+      remainingCostData
     };
 
     return resp;
@@ -1257,7 +1258,7 @@ const getCostAndSlotOverview = async () => {
 };
 
 const postReminderScheduler = async () => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const dayToFetch = [1, 3];
 
   try {
@@ -1266,23 +1267,21 @@ const postReminderScheduler = async () => {
     const result = await pool.request().query(query);
 
     const { recordset = [] } = result;
-    const postsToBeUpdated = recordset.filter((data) =>
-      dayToFetch.includes(data.deadline)
-    );
-    console.log("Reminder:", postsToBeUpdated);
+    const postsToBeUpdated = recordset.filter((data) => dayToFetch.includes(data.deadline));
+    console.log('Reminder:', postsToBeUpdated);
 
     const messagePayload = postsToBeUpdated.map((data) => {
       const { kolName, deadlineDate, phoneNumber } = data;
       const message = getPostReminderTemplate(kolName, deadlineDate);
       return {
-        number: phoneNumber + `@c.us`,
-        message,
+        number: `${phoneNumber}@c.us`,
+        message
       };
     });
 
     messagePayload.forEach(async (message) => {
       await WhatsappConnector.sendMessage(message);
-      console.log("send message to phone", message.number);
+      console.log('send message to phone', message.number);
     });
   } catch (err) {
     console.error(err);
@@ -1291,7 +1290,7 @@ const postReminderScheduler = async () => {
 };
 
 const contractReminderScheduler = async () => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const dayToFetch = [7, 14];
 
   try {
@@ -1300,23 +1299,21 @@ const contractReminderScheduler = async () => {
     const result = await pool.request().query(query);
 
     const { recordset = [] } = result;
-    const kolList = recordset.filter((data) =>
-      dayToFetch.includes(data.dateDifference)
-    );
-    console.log("Reminder:", kolList);
+    const kolList = recordset.filter((data) => dayToFetch.includes(data.dateDifference));
+    console.log('Reminder:', kolList);
 
     const messagePayload = kolList.map((data) => {
       const { phoneNumber } = data;
       const message = getContractReminderTemplate(data);
       return {
-        number: phoneNumber + `@c.us`,
-        message,
+        number: `${phoneNumber}@c.us`,
+        message
       };
     });
 
     messagePayload.forEach(async (message) => {
       await WhatsappConnector.sendMessage(message);
-      console.log("send message to phone", message.number);
+      console.log('send message to phone', message.number);
     });
   } catch (err) {
     console.error(err);
@@ -1325,18 +1322,18 @@ const contractReminderScheduler = async () => {
 };
 
 const getKolListByBrief = async (briefId) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
 
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("briefId", briefId)
+      .input('briefId', briefId)
       .query(QUERIES.GET_KOL_LIST_BY_BRIEF_ID);
     console.log(result.recordset);
 
     const { recordset } = result;
-    resp.status = "true";
+    resp.status = 'true';
     resp.message = recordset;
 
     return resp;
@@ -1346,79 +1343,76 @@ const getKolListByBrief = async (briefId) => {
 };
 
 const sendBriefToDestination = async (payload) => {
-  let resp = { status: "false" };
+  const resp = { status: 'false' };
   const { params, destination, briefId } = payload;
 
   try {
     const pool = await poolPromise;
     const kolResult = await pool
       .request()
-      .execute("[MARKETING].[dbo].[SP_GetListKol]");
+      .execute('[MARKETING].[dbo].[SP_GetListKol]');
     const { recordset } = kolResult;
 
-    const recipient = recordset.filter((data) =>
-      params === "kol"
-        ? destination.includes(data["Kol Id"])
-        : destination.includes(data["kolCategoryId"])
-    );
+    const recipient = recordset.filter((data) => (params === 'kol'
+      ? destination.includes(data['Kol Id'])
+      : destination.includes(data.kolCategoryId)));
 
     const briefResult = await pool
       .request()
-      .input("briefId", briefId)
+      .input('briefId', briefId)
       .query(QUERIES.GET_BRIEF_DETAIL);
     const { recordset: briefRecordset } = briefResult;
     const brief = briefRecordset[0];
 
     const messagePayload = recipient.map((data) => {
-      const phoneNumber = data["No Whatsapp"];
-      const kolName = data["Name"];
+      const phoneNumber = data['No Whatsapp'];
+      const kolName = data.Name;
       const message = getBroadcastBriefTemplate({ ...brief, kolName });
 
       return {
-        number: phoneNumber + `@c.us`,
-        message,
+        number: `${phoneNumber}@c.us`,
+        message
       };
     });
 
     for (const message of messagePayload) {
       const result = await WhatsappConnector.sendMessage(message);
-      if (result.status === "true") {
-        resp.status = "true";
-        console.log("hai", resp)
+      if (result.status === 'true') {
+        resp.status = 'true';
+        console.log('hai', resp);
       }
-      console.log("send message to phone", message.number);
+      console.log('send message to phone', message.number);
     }
-   
 
     return resp;
   } catch (error) {
-    console.log("error yaw", error);
+    console.log('error yaw', error);
     return resp;
   }
 };
 
 module.exports = {
   insertNewKOL,
-  GetFormatListKol,
-  GetListKol,
-  GetALLKolName,
-  GetKolDetailByID,
-  GetSubMediaById,
+  getFormatListKol,
+  getListKol,
+  getALLKolName,
+  getKolDetailByID,
+  getSubMediaById,
   insertNewKontrak,
-  GetListKontrak,
-  GetKontrakDetailByID,
+  getListKontrak,
+  getKontrakDetailByID,
   insertNewBrief,
-  GetListBrief,
+  getListBrief,
   insertNewManager,
   procToSendEmail,
   sendMessageToQueue,
-  GetListManager,
-  GetListKontrakIteration,
+  getListManager,
+  getListKontrakIteration,
   insertNewPost,
   checkFileStatus,
-  ExecSPWithoutInput,
-  ExecSPWithInput,
-  UpdatePostStatsById,
+  execSPWithoutInput,
+  execSPWithInput,
+  updatePostStatsById,
   getPostDetail,
   updatePostById,
   updatePostStatisticScheduler,
@@ -1429,9 +1423,8 @@ module.exports = {
   getPostViewByManagerId,
   getOverviewData,
   getCostAndSlotOverview,
-  // regenerateContractFile,
   postReminderScheduler,
   contractReminderScheduler,
   getKolListByBrief,
-  sendBriefToDestination,
+  sendBriefToDestination
 };
