@@ -227,7 +227,39 @@ where a.[Kontrak Id] = @contractId`,
     VALUES(@fileName, 2, GETDATE(), GETDATE(), @contractId);`,
   UPDATE_FILE_MOU: `UPDATE MARKETING.dbo.[File Mou]
     SET [File Name]=@fileName, [Last Update Date]=GETDATE()
-    WHERE [Contract Id]=@contractId;`
+    WHERE [Contract Id]=@contractId;`,
+  GET_MAX_VIEW_PER_MONTH: `SELECT  a.postId, c.views, right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4)) as yearMonth,
+    e.Name as kolName, e.Platform as platform
+    from MARKETING.dbo.Post_View a
+    JOIN MARKETING.dbo.Post b on b.[Post Id] = a.postId 
+    JOIN (
+    SELECT max(a.views) as views, right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4)) as yearMonth
+    from MARKETING.dbo.Post_View a
+    JOIN MARKETING.dbo.Post b on b.[Post Id] = a.postId 
+    GROUP BY right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))
+    ) as c on c.yearMonth = yearMonth
+    JOIN MARKETING.dbo.[Kol Kontrak] d on d.[Kontrak Id] = b.[Kontrak Id] 
+    JOIN MARKETING.dbo.Kol e on e.[Kol Id] = d.[Kol Id] 
+    where a.views = c.views`,
+  GET_MAX_CPM_PER_MONTH: `SELECT right('00' + CAST(MONTH(c.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(c.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth,
+    (d.[Cost Per Slot]/a.views*1000) as cpm, f.Name as kolName, f.Platform as platform
+    FROM MARKETING.dbo.Post_View a
+    JOIN
+    (
+    SELECT MAX(c.[Cost Per Slot]/a.views*1000) as maxCpm,
+    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+    FROM MARKETING.dbo.Post_View a
+    JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id]
+    JOIN MARKETING.dbo.[Kol Kontrak Status] c on c.[Kontrak Id] = b.[Kontrak Id] 
+    where a.dayNumber = 7
+    GROUP BY 
+    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))
+    ) as b on b.yearMonth = yearMonth
+    JOIN MARKETING.dbo.Post c on a.postId = c.[Post Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak Status] d on c.[Kontrak Id] = d.[Kontrak Id] 
+    JOIN MARKETING.dbo.[Kol Kontrak] e on e.[Kontrak Id] = c.[Kontrak Id]
+    JOIN MARKETING.dbo.Kol f on f.[Kol Id] = e.[Kol Id] 
+    WHERE b.maxCpm = (d.[Cost Per Slot]/a.views*1000)`
 };
 
 module.exports = { QUERIES };

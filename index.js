@@ -56,7 +56,8 @@ const {
   postReminderScheduler,
   contractReminderScheduler,
   getKolListByBrief,
-  sendBriefToDestination
+  sendBriefToDestination,
+  getMonthlyOverview
 } = require('./routes/Marketing');
 // const multer = require("multer");
 const { upload } = require('./utility/multer');
@@ -510,6 +511,14 @@ app.post('/broadcastBrief', async (req, res) => {
   const { body } = req;
   const result = await sendBriefToDestination(body);
   console.log('routes:/broadcastBrief');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+app.get('/getMonthlyOverview', async (req, res) => {
+  const result = await getMonthlyOverview();
+  console.log('routes:/getMonthlyOverview');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

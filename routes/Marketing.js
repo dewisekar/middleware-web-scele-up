@@ -15,7 +15,8 @@ const GenerateFile = require('./GenerateFile');
 const {
   getPostReminderTemplate,
   getContractReminderTemplate,
-  getBroadcastBriefTemplate
+  getBroadcastBriefTemplate,
+  getInvoiceReminderTemplate
 } = require('../message-template');
 const { convertDate, DateMode, convertToIdr } = require('../utils');
 
@@ -361,8 +362,6 @@ const _regenerateContract = async (contractId, isNewContract = true) => {
       DP: convertToIdr((BIAYA * DP) / 100)
     };
 
-    console.log(payload);
-
     const fileName = await GenerateFile.generateFile(payload);
 
     const updateQuery = isNewContract ? QUERIES.INSERT_FILE_MOU : QUERIES.UPDATE_FILE_MOU;
@@ -398,7 +397,6 @@ const checkFileStatus = async (req) => {
       return resp;
     }
 
-    console.log('gaada');
     const newGeneratedFile = await _regenerateContract(req.FileId, false);
 
     resp.filename = newGeneratedFile;
@@ -424,6 +422,19 @@ const insertNewKontrak = async (req) => {
     const { DP } = req;
     const pool = await poolPromise;
 
+    const fetchedKol = await pool
+      .request()
+      .input('ID', Id)
+      .execute('[MARKETING].[dbo].[SP_GetDetailKolByID]');
+    const { recordset: kolResult } = fetchedKol;
+    const [kolFirstRecord] = kolResult;
+    const message = getInvoiceReminderTemplate(kolFirstRecord.NAME);
+    const messagePayload = {
+      number: `${kolFirstRecord.NO_HP}@c.us`,
+      message
+    };
+    // const
+
     const result = await pool
       .request()
       .input('id', Id)
@@ -442,41 +453,17 @@ const insertNewKontrak = async (req) => {
       if (result.recordset.length === 1) {
         if (result.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
           if (result.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
+            const contractId = result.recordset[0].KONTRAK_ID;
             resp.status = 'true';
-            resp.kontrakId = result.recordset[0].KONTRAK_ID;
+            resp.kontrakId = contractId;
             resp.kontrakKe = result.recordset[0].KONTRAK_KE;
             resp.FILE_ID = result.recordset[0].FILE_ID;
             req.FileId = result.recordset[0].FILE_ID;
-            const status = await sendToTheQueue('generate_file_contract', req);
-            console.log(
-              'sendToTheQueue, queue:generate_file_contract, msg : ',
-              req.toString(),
-              ',status:',
-              status
-            );
 
-            let fileStatus = false;
-            let count = 0;
-            const maxIterator = 5;
-            while (!fileStatus && count < maxIterator) {
-              // eslint-disable-next-line no-await-in-loop
-              const result2 = await pool
-                .request()
-                .input('FileId', req.FileId)
-                .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
-              console.log('SP_CheckStatusFile:', result2.recordset);
-              if (result2.recordset.length === 1) {
-                if (result2.recordset[0].RESPONSE_MESSAGE !== 'undefined') {
-                  if (result2.recordset[0].RESPONSE_MESSAGE === 'SUCCESS') {
-                    fileStatus = true;
-                    resp.filename = result2.recordset[0].FILE_NAME;
-                  }
-                }
-              }
-              // eslint-disable-next-line no-await-in-loop, no-promise-executor-return
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              count += 1;
-            }
+            const newGeneratedFile = await _regenerateContract(contractId, true);
+            await WhatsappConnector.sendMessage(messagePayload);
+
+            resp.filename = newGeneratedFile;
           } else {
             resp.message = result.recordset[0].RESPONSE_MESSAGE;
           }
@@ -1424,6 +1411,44 @@ const sendBriefToDestination = async (payload) => {
   }
 };
 
+const getMonthlyOverview = async () => {
+  const resp = { status: 'false' };
+
+  try {
+    const pool = await poolPromise;
+    const { recordset: monthlyViews } = await pool
+      .request()
+      .query(QUERIES.GET_MAX_VIEW_PER_MONTH);
+    console.log(monthlyViews);
+
+    const { recordset: monthlyCpm } = await pool
+      .request()
+      .query(QUERIES.GET_MAX_CPM_PER_MONTH);
+    console.log(monthlyCpm);
+
+    const mergedData = monthlyViews.map((data) => {
+      const {
+        views: maxViews, yearMonth, kolName: kolMaxViews, platform: platforMaxViews
+      } = data;
+      const [cpmData] = monthlyCpm.filter((cpm) => cpm.yearMonth === yearMonth);
+      const { cpm: maxCpm, kolName: kolMaxCpm, platform: platformMaxCpm } = cpmData;
+      console.log(cpmData);
+
+      return {
+        maxViews, yearMonth, kolMaxViews, platforMaxViews, maxCpm, kolMaxCpm, platformMaxCpm
+      };
+    });
+
+    resp.status = 'true';
+    resp.message = mergedData;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1459,5 +1484,6 @@ module.exports = {
   postReminderScheduler,
   contractReminderScheduler,
   getKolListByBrief,
-  sendBriefToDestination
+  sendBriefToDestination,
+  getMonthlyOverview
 };
