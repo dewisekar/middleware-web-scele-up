@@ -59,17 +59,19 @@ where a.[Kontrak Id] = @contractId`,
   UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
     SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=dateadd(HOUR, 7, getdate()) 
     WHERE [Post Id]=@postId;`,
-  GET_UPLOADED_POST: `SELECT [Post Id] as postId, 
-    [Tgl Post Sesuai Jadwal] as deadlineDate, 
-    [Tgl Post Real] as uploadDate, 
-    [Kontrak Id] as contractId, 
-    [Manager Id] as managerId, 
-    [Brief Id] as briefId, 
-    [Link Post] as linkPost, 
-    [Slot Ke] as slotNumber, 
-    DATEDIFF(day,[Tgl Post Real], dateadd(HOUR, 7, getdate()) ) as dateDifference
-    FROM MARKETING.dbo.Post
-    WHERE [Tgl Post Real] IS NOT NULL`,
+  GET_UPLOADED_POST: `SELECT a.[Post Id] as postId, 
+  a.[Tgl Post Sesuai Jadwal] as deadlineDate, 
+  a.[Tgl Post Real] as uploadDate, 
+  a.[Kontrak Id] as contractId, 
+  a.[Manager Id] as managerId, 
+  a.[Brief Id] as briefId, 
+  a.[Link Post] as linkPost, 
+  a.[Slot Ke] as slotNumber, 
+  DATEDIFF(day,[Tgl Post Real], dateadd(HOUR, 7, getdate()) ) as dateDifference
+  FROM MARKETING.dbo.Post a
+  JOIN MARKETING.dbo.[Kol Kontrak] b on b.[Kontrak Id] = a.[Kontrak Id] 
+  JOIN MARKETING.dbo.Kol c on c.[Kol Id] = b.[Kol Id] 
+  WHERE [Tgl Post Real] IS  NOT NULL and c.Platform = 'Tiktok'`,
   INSERT_NEW_LOG: `INSERT INTO MARKETING.dbo.Log_Marketing
     (Waktu, Query, [User], RESPONSE_MESSAGE)
     VALUES(dateadd(HOUR, 7, getdate()) , @query, @user, @responseMessage);`,

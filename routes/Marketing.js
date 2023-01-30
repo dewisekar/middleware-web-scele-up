@@ -967,7 +967,9 @@ const _insertPostStatistic = async (payload) => {
 
 const updatePostById = async (id, payload) => {
   const resp = { status: 'false' };
-  const { linkPost, deadlineDate, uploadDate } = payload;
+  const {
+    linkPost, deadlineDate, uploadDate, platform
+  } = payload;
   const today = new Date();
   const todayGMT = today.setHours(today.getHours() + 7);
   try {
@@ -991,7 +993,7 @@ const updatePostById = async (id, payload) => {
       resp.status = 'true';
     }
 
-    if (differenceUploadDateToToday > 0) {
+    if (differenceUploadDateToToday > 0 && platform === 'Tiktok') {
       console.log('Update post statistic for day 1');
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
