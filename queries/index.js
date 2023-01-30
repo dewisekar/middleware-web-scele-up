@@ -259,7 +259,8 @@ where a.[Kontrak Id] = @contractId`,
     JOIN MARKETING.dbo.[Kol Kontrak Status] d on c.[Kontrak Id] = d.[Kontrak Id] 
     JOIN MARKETING.dbo.[Kol Kontrak] e on e.[Kontrak Id] = c.[Kontrak Id]
     JOIN MARKETING.dbo.Kol f on f.[Kol Id] = e.[Kol Id] 
-    WHERE b.maxCpm = (d.[Cost Per Slot]/a.views*1000)`
+    WHERE b.maxCpm = (d.[Cost Per Slot]/a.views*1000)`,
+  GET_BANK_LIST: 'SELECT * FROM MARKETING.dbo.bank'
 };
 
 module.exports = { QUERIES };

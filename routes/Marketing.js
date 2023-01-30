@@ -1449,6 +1449,26 @@ const getMonthlyOverview = async () => {
   }
 };
 
+const getBankList = async () => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query(QUERIES.GET_BANK_LIST);
+    console.log(result.recordset);
+
+    const { recordset } = result;
+    resp.status = 'true';
+    resp.message = recordset;
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1485,5 +1505,6 @@ module.exports = {
   contractReminderScheduler,
   getKolListByBrief,
   sendBriefToDestination,
-  getMonthlyOverview
+  getMonthlyOverview,
+  getBankList
 };
