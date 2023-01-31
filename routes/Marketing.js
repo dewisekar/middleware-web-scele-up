@@ -1372,12 +1372,12 @@ const sendBriefToDestination = async (payload) => {
     const pool = await poolPromise;
     const kolResult = await pool
       .request()
-      .execute('[MARKETING].[dbo].[SP_GetListKol]');
+      .query(QUERIES.GET_ACTIVE_KOL);
     const { recordset } = kolResult;
 
     const recipient = recordset.filter((data) => (params === 'kol'
-      ? destination.includes(data['Kol Id'])
-      : destination.includes(data.kolCategoryId)));
+      ? destination.includes(data.kolId) && data.isHasActiveContract === 'YES'
+      : destination.includes(data.kolCategoryId) && data.isHasActiveContract === 'YES'));
 
     const briefResult = await pool
       .request()
@@ -1387,8 +1387,7 @@ const sendBriefToDestination = async (payload) => {
     const brief = briefRecordset[0];
 
     const messagePayload = recipient.map((data) => {
-      const phoneNumber = data['No Whatsapp'];
-      const kolName = data.Name;
+      const { phoneNumber, kolName } = data;
       const message = getBroadcastBriefTemplate({ ...brief, kolName });
 
       return {

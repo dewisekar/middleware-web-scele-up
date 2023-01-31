@@ -263,7 +263,11 @@ where a.[Kontrak Id] = @contractId`,
     JOIN MARKETING.dbo.[Kol Kontrak] e on e.[Kontrak Id] = c.[Kontrak Id]
     JOIN MARKETING.dbo.Kol f on f.[Kol Id] = e.[Kol Id] 
     WHERE b.maxCpm = (d.[Cost Per Slot]/a.views*1000)`,
-  GET_BANK_LIST: 'SELECT * FROM MARKETING.dbo.bank'
+  GET_BANK_LIST: 'SELECT * FROM MARKETING.dbo.bank',
+  GET_ACTIVE_KOL: `select DISTINCT a.Name as kolName, a.[No Whatsapp] as phoneNumber, a.[Kol Id] as kolId, a.[Kategori Kol] as kolCategoryId, 
+  CAST(CASE WHEN b.[Kontrak Id] is NOT NULL AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) , b.[Masa Kontrak Akhir] ) > 0  THEN 'YES' ELSE 'NO' END AS varchar) as isHasActiveContract
+  from marketing.dbo.Kol a
+  left Join MARKETING.dbo.[Kol Kontrak] b on a.[Kol Id] = b.[Kol Id]`
 };
 
 module.exports = { QUERIES };
