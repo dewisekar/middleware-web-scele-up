@@ -40,7 +40,7 @@ c.[Sisa Slot],
 c.[Slot Terupload],
 b.KTP as kolKtp, 
 b.[Alamat KOL] as kolAddress,
-b.BANK as kolBank,
+g.name as kolBank,
 b.[Nomor Rekening] as kolRekening,
 CASE 
 When DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
@@ -55,6 +55,7 @@ JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
 JOIN MARKETING.dbo.[Kol Kontrak Status] c on c.[Kontrak Id] = a.[Kontrak Id] 
 JOIN MARKETING.dbo.[Kol Manager] e on e.[Manager Id] = a.[Manager Id] 
 JOIN MARKETING.dbo.[KolCategory] f on f.[id] = b.[Kategori Kol] 
+JOIN MARKETING.dbo.bank g on g.[code] = b.[BANK] 
 where a.[Kontrak Id] = @contractId`,
   UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
     SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=dateadd(HOUR, 7, getdate()) 
