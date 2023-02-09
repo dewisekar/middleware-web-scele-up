@@ -1364,6 +1364,28 @@ const getKolListByBrief = async (briefId) => {
   }
 };
 
+const getActiveKol = async () => {
+  const resp = { status: 'false' };
+
+  try {
+    const pool = await poolPromise;
+    const kolResult = await pool
+      .request()
+      .query(QUERIES.GET_ACTIVE_KOL);
+    const { recordset } = kolResult;
+
+    const activeKol = recordset.filter((data) => data.isHasActiveContract === 'YES');
+
+    resp.status = 'true';
+    resp.message = activeKol;
+
+    return resp;
+  } catch (error) {
+    console.log('error yaw', error);
+    return resp;
+  }
+};
+
 const sendBriefToDestination = async (payload) => {
   const resp = { status: 'false' };
   const { params, destination, briefId } = payload;
@@ -1507,5 +1529,6 @@ module.exports = {
   getKolListByBrief,
   sendBriefToDestination,
   getMonthlyOverview,
-  getBankList
+  getBankList,
+  getActiveKol
 };
