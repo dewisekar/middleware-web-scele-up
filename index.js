@@ -59,7 +59,8 @@ const {
   sendBriefToDestination,
   getMonthlyOverview,
   getBankList,
-  getActiveKol
+  getActiveKol,
+  updateKolById
 } = require('./routes/Marketing');
 // const multer = require("multer");
 const { upload } = require('./utility/multer');
@@ -537,6 +538,16 @@ app.get('/bank-list', async (req, res) => {
 app.get('/kol/active', async (req, res) => {
   const result = await getActiveKol();
   console.log('routes: GET /kol/active');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+app.patch('/kol/:id', async (req, res) => {
+  const { params: { id }, body } = req;
+  console.log('id', id);
+  const result = await updateKolById(id, body);
+  console.log('routes: GET /kol/edit');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

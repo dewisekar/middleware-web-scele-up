@@ -1492,6 +1492,46 @@ const getBankList = async () => {
   }
 };
 
+const updateKolById = async (id, payload) => {
+  const resp = { status: 'false' };
+  try {
+    const {
+      jenisEndorse,
+      platform,
+      kolCategory,
+      name,
+      username,
+      phoneNumber,
+      address,
+      rekening,
+      ktp,
+      bank
+    } = payload;
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('jenisEndorse', jenisEndorse)
+      .input('platform', platform)
+      .input('kolCategory', kolCategory)
+      .input('name', name)
+      .input('username', username)
+      .input('phoneNumber', phoneNumber)
+      .input('address', address)
+      .input('rekening', rekening)
+      .input('ktp', ktp)
+      .input('bank', bank)
+      .input('id', id)
+      .query(QUERIES.UPDATE_KOL);
+    resp.status = 'true';
+    resp.message = result.recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1530,5 +1570,6 @@ module.exports = {
   sendBriefToDestination,
   getMonthlyOverview,
   getBankList,
-  getActiveKol
+  getActiveKol,
+  updateKolById
 };

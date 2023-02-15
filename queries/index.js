@@ -267,7 +267,10 @@ where a.[Kontrak Id] = @contractId`,
   GET_ACTIVE_KOL: `select DISTINCT a.Name as kolName, a.[No Whatsapp] as phoneNumber, a.[Kol Id] as kolId, a.[Kategori Kol] as kolCategoryId, 
   CAST(CASE WHEN b.[Kontrak Id] is NOT NULL AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) , b.[Masa Kontrak Akhir] ) > 0  THEN 'YES' ELSE 'NO' END AS varchar) as isHasActiveContract
   from marketing.dbo.Kol a
-  left Join MARKETING.dbo.[Kol Kontrak] b on a.[Kol Id] = b.[Kol Id]`
+  left Join MARKETING.dbo.[Kol Kontrak] b on a.[Kol Id] = b.[Kol Id]`,
+  UPDATE_KOL: `UPDATE MARKETING.dbo.Kol
+  SET  Platform=@platform, Jenis=@jenisEndorse, Name=@name, Username=@username, [Nomor Rekening]=@rekening, [Alamat KOL]=@address, [No Whatsapp]=@phoneNumber, KTP=@ktp, BANK=@bank, [Kategori Kol]=@kolCategory
+  WHERE [Kol Id]=@id;`
 };
 
 module.exports = { QUERIES };
