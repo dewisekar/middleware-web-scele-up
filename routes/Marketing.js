@@ -390,14 +390,6 @@ const checkFileStatus = async (req) => {
       .execute('[MARKETING].[dbo].[SP_CheckStatusFile]');
     console.log('SP_CheckStatusFile:', result.recordset);
 
-    const { FILE_NAME: pathToFile } = result.recordset[0];
-
-    if (fs.existsSync(pathToFile)) {
-      resp.filename = pathToFile;
-      resp.status = 'true';
-      return resp;
-    }
-
     const newGeneratedFile = await _regenerateContract(req.FileId, false);
 
     resp.filename = newGeneratedFile;
