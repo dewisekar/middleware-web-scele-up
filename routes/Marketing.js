@@ -235,6 +235,7 @@ const getKolDetailByID = async (req) => {
       .input('ID', Id)
       .execute('[MARKETING].[dbo].[SP_GetDetailKolByID]');
     console.log(result.recordset);
+    console.log('ini ersult', result);
 
     if (typeof result.recordset !== 'undefined') {
       if (result.recordset.length >= 1) {
@@ -760,7 +761,6 @@ const getListManager = async () => {
 
 const insertNewPost = async (req) => {
   const resp = { status: 'false' };
-  console.log('ini req', req);
   try {
     const {
       KontrakId, ManagerId, BriefId, TglPostKontrak, User
@@ -1532,6 +1532,46 @@ const updateKolById = async (id, payload) => {
   }
 };
 
+const updateKontrakById = async (id, payload) => {
+  const resp = { status: 'false' };
+  try {
+    const {
+      subMedia,
+      bookingSlot,
+      biayaKerjaSama,
+      managerId,
+      tanggalAwalKerjaSama,
+      tanggalAkhirKerjaSama,
+      dp
+    } = payload;
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('subMedia', subMedia)
+      .input('bookingSlot', bookingSlot)
+      .input('biayaKerjaSama', biayaKerjaSama)
+      .input('managerId', managerId)
+      .input('tanggalAwalKerjaSama', tanggalAwalKerjaSama)
+      .input('tanggalAkhirKerjaSama', tanggalAkhirKerjaSama)
+      .input('dp', dp)
+      .input('id', id)
+      .query(QUERIES.UPDATE_KONTRAK);
+
+    await pool
+      .request()
+      .input('subMedia', subMedia)
+      .input('id', id)
+      .query(QUERIES.UPDATE_KONTRAK_STATUS);
+    resp.status = 'true';
+    resp.message = result.recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1571,5 +1611,6 @@ module.exports = {
   getMonthlyOverview,
   getBankList,
   getActiveKol,
-  updateKolById
+  updateKolById,
+  updateKontrakById
 };

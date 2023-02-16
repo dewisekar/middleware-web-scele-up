@@ -1,7 +1,7 @@
 const express = require('express');
 // Import the express dependency
 const app = express(); // Instantiate an express app, the main work horse of this server
-const port = 5002; // Save the port number where your server will be listening
+const port = 5000; // Save the port number where your server will be listening
 const cron = require('node-cron');
 const cors = require('cors');
 const {
@@ -60,7 +60,8 @@ const {
   getMonthlyOverview,
   getBankList,
   getActiveKol,
-  updateKolById
+  updateKolById,
+  updateKontrakById
 } = require('./routes/Marketing');
 // const multer = require("multer");
 const { upload } = require('./utility/multer');
@@ -545,9 +546,18 @@ app.get('/kol/active', async (req, res) => {
 
 app.patch('/kol/:id', async (req, res) => {
   const { params: { id }, body } = req;
-  console.log('id', id);
   const result = await updateKolById(id, body);
   console.log('routes: GET /kol/edit');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+app.patch('/kontrak/:id', async (req, res) => {
+  const { params: { id }, body } = req;
+  console.log('id', id);
+  const result = await updateKontrakById(id, body);
+  console.log('routes: GET /kontrak/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

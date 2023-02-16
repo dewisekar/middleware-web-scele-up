@@ -270,7 +270,15 @@ where a.[Kontrak Id] = @contractId`,
   left Join MARKETING.dbo.[Kol Kontrak] b on a.[Kol Id] = b.[Kol Id]`,
   UPDATE_KOL: `UPDATE MARKETING.dbo.Kol
   SET  Platform=@platform, Jenis=@jenisEndorse, Name=@name, Username=@username, [Nomor Rekening]=@rekening, [Alamat KOL]=@address, [No Whatsapp]=@phoneNumber, KTP=@ktp, BANK=@bank, [Kategori Kol]=@kolCategory
-  WHERE [Kol Id]=@id;`
+  WHERE [Kol Id]=@id;`,
+  UPDATE_KONTRAK: `UPDATE MARKETING.dbo.[Kol Kontrak]
+  SET [Sub Media]=@subMedia, [Booking Slot]=@bookingSlot, [Total Kerjasama]=@biayaKerjaSama, [Masa Kontrak Mulai]=@tanggalAwalKerjaSama, [Masa Kontrak Akhir]=@tanggalAkhirKerjaSama, [Manager Id]=@managerId, DP=@dp
+  WHERE [Kontrak Id]=@id;
+  `,
+  UPDATE_KONTRAK_STATUS: `UPDATE MARKETING.dbo.[Kol Kontrak Status]
+  SET [Sub Media]=@subMedia
+  WHERE [Kontrak Id]=@id;
+  `
 };
 
 module.exports = { QUERIES };
