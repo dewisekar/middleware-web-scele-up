@@ -160,7 +160,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_OVERVIEW_BY_BRIEF_ID: `SELECT AVG(views) as avgViews, 
     SUM(views) as totalViews,
     COUNT(views) as numberOfPost, 
-    AVG(c.[Cost Per Slot]/a.views*1000) as avgCpm,
+    AVG( COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as avgCpm,
     right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
@@ -171,7 +171,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_OVERVIEW_BY_MANAGER_ID: `SELECT AVG(views) as avgViews, 
     SUM(views) as totalViews,
     COUNT(views) as numberOfPost, 
-    AVG(c.[Cost Per Slot]/a.views*1000) as avgCpm,
+    AVG( COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as avgCpm,
     right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
@@ -182,7 +182,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_OVERVIEW_BY_KOL_CATEGORY_ID: `SELECT AVG(views) as avgViews, 
     SUM(views) as totalViews,
     COUNT(views) as numberOfPost, 
-    AVG(c.[Cost Per Slot]/a.views*1000) as avgCpm,
+     AVG( COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as avgCpm,
     right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
@@ -196,7 +196,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_OVERVIEW_BY_KOL_ID: `SELECT AVG(views) as avgViews, 
     SUM(views) as totalViews,
     COUNT(views) as numberOfPost, 
-    AVG(c.[Cost Per Slot]/a.views*1000) as avgCpm,
+     AVG( COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as avgCpm,
     right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
@@ -244,13 +244,13 @@ where a.[Kontrak Id] = @contractId`,
     JOIN MARKETING.dbo.[Kol Kontrak] d on d.[Kontrak Id] = b.[Kontrak Id] 
     JOIN MARKETING.dbo.Kol e on e.[Kol Id] = d.[Kol Id] `,
   GET_MAX_CPM_PER_MONTH: `SELECT right('00' + CAST(MONTH(c.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(c.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth,
-    (d.[Cost Per Slot]/a.views*1000) as cpm, f.Name as kolName, f.Platform as platform
+  COALESCE(d.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0) as cpm, f.Name as kolName, f.Platform as platform
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post c on a.postId = c.[Post Id] 
     JOIN MARKETING.dbo.[Kol Kontrak Status] d on c.[Kontrak Id] = d.[Kontrak Id]
     JOIN
     (
-    SELECT MAX(c.[Cost Per Slot]/a.views*1000) as maxCpm,
+    SELECT MAX(COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as maxCpm,
     right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id]
@@ -261,7 +261,7 @@ where a.[Kontrak Id] = @contractId`,
     ) as b on b.yearMonth = right('00' + CAST(MONTH(c.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(c.[Tgl Post Real]) AS VARCHAR(4)) 
     JOIN MARKETING.dbo.[Kol Kontrak] e on e.[Kontrak Id] = c.[Kontrak Id]
     JOIN MARKETING.dbo.Kol f on f.[Kol Id] = e.[Kol Id] 
-    WHERE b.maxCpm = (d.[Cost Per Slot]/a.views*1000)`,
+    WHERE b.maxCpm = (COALESCE(d.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0))`,
   GET_BANK_LIST: 'SELECT * FROM MARKETING.dbo.bank',
   GET_ACTIVE_KOL: `select DISTINCT a.Name as kolName, a.[No Whatsapp] as phoneNumber, a.[Kol Id] as kolId, a.[Kategori Kol] as kolCategoryId, 
   CAST(CASE WHEN b.[Kontrak Id] is NOT NULL AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) , b.[Masa Kontrak Akhir] ) > 0  THEN 'YES' ELSE 'NO' END AS varchar) as isHasActiveContract
