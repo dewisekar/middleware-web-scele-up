@@ -229,6 +229,7 @@ const getKolDetailByID = async (req) => {
   const resp = { status: 'false' };
   try {
     const { Id } = req;
+    console.log('ini id', Id);
     const pool = await poolPromise;
     const result = await pool
       .request()
@@ -1031,7 +1032,7 @@ const updatePostStatisticScheduler = async () => {
 
     const { recordset = [] } = result;
     const postsToBeUpdated = recordset.filter((data) => dayToFetch.includes(data.dateDifference));
-    console.log('Posts to Be Updated:', postsToBeUpdated);
+    console.log('Posts to Be Updated:', postsToBeUpdated.length);
 
     const postsStatistics = [];
     for (const post of postsToBeUpdated) {
@@ -1046,7 +1047,7 @@ const updatePostStatisticScheduler = async () => {
       };
 
       await sleep(1000);
-      console.log('Fetching post statistic');
+      console.log('Fetching post statistic for link: ', linkPost);
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
