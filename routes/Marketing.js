@@ -340,7 +340,7 @@ const _regenerateContract = async (contractId, isNewContract = true) => {
     const convertedSignedDate = new Date(contractSignedDate);
 
     const payload = {
-      ID: (`00${contractId}`).slice(-3),
+      ID: contractId.length < 3 ? (`00${contractId}`).slice(-3) : contractId,
       BULAN: (`0${convertedSignedDate.getMonth() + 1}`).slice(-2),
       TAHUN: convertedSignedDate.getFullYear(),
       DATE_NOW: convertDate(contractSignedDate, DateMode.DDDDMMYYY_INDONESIAN),
