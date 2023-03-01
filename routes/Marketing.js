@@ -964,12 +964,8 @@ const updatePostById = async (id, payload) => {
     linkPost, deadlineDate, uploadDate, platform
   } = payload;
   const today = new Date();
-  const todayGMT = today.setHours(today.getHours() + 7);
   try {
-    const differenceUploadDateToToday = _getDayDifference(
-      new Date(uploadDate),
-      new Date(todayGMT)
-    );
+    const differenceUploadDateToToday = _getDayDifference(new Date(uploadDate), today);
     const pool = await poolPromise;
     const query = QUERIES.UPDATE_POST_QUERY;
     const result = await pool
@@ -1032,7 +1028,8 @@ const updatePostStatisticScheduler = async () => {
 
     const { recordset = [] } = result;
     const postsToBeUpdated = recordset.filter((data) => dayToFetch.includes(data.dateDifference));
-    console.log('Posts to Be Updated:', postsToBeUpdated.length);
+    console.log('Posts to Be Updated:', postsToBeUpdated);
+    console.log('Amount:', postsToBeUpdated.length);
 
     const postsStatistics = [];
     for (const post of postsToBeUpdated) {

@@ -43,8 +43,8 @@ b.[Alamat KOL] as kolAddress,
 g.name as kolBank,
 b.[Nomor Rekening] as kolRekening,
 CASE 
-When DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
-WHEN DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Masa Kontrak Akhir] ) < 0 THEN 'TIDAK AKTIF'
+When DATEDIFF(day, getDate() , a.[Masa Kontrak Akhir] ) <= 30 and DATEDIFF(day, getDate() , a.[Masa Kontrak Akhir] ) >=0 THEN 'PERLU DIPERBARUI'
+WHEN DATEDIFF(day, getDate() , a.[Masa Kontrak Akhir] ) < 0 THEN 'TIDAK AKTIF'
 WHEN c.[Slot Terupload] = a.[Booking Slot] THEN 'SLOT PENUH'
 else 'AKTIF'
 END as contractStatus,
@@ -58,7 +58,7 @@ JOIN MARKETING.dbo.[KolCategory] f on f.[id] = b.[Kategori Kol]
 JOIN MARKETING.dbo.bank g on g.[code] = b.[BANK] 
 where a.[Kontrak Id] = @contractId`,
   UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
-    SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=dateadd(HOUR, 7, getdate()) 
+    SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=getDate() 
     WHERE [Post Id]=@postId;`,
   GET_UPLOADED_POST: `SELECT a.[Post Id] as postId, 
   a.[Tgl Post Sesuai Jadwal] as deadlineDate, 
@@ -68,14 +68,14 @@ where a.[Kontrak Id] = @contractId`,
   a.[Brief Id] as briefId, 
   a.[Link Post] as linkPost, 
   a.[Slot Ke] as slotNumber, 
-  DATEDIFF(day,[Tgl Post Real], dateadd(HOUR, 7, getdate()) ) as dateDifference
+  DATEDIFF(day,[Tgl Post Real], getdate()) as dateDifference
   FROM MARKETING.dbo.Post a
   JOIN MARKETING.dbo.[Kol Kontrak] b on b.[Kontrak Id] = a.[Kontrak Id] 
   JOIN MARKETING.dbo.Kol c on c.[Kol Id] = b.[Kol Id] 
   WHERE [Tgl Post Real] IS  NOT NULL and c.Platform = 'Tiktok'`,
   INSERT_NEW_LOG: `INSERT INTO MARKETING.dbo.Log_Marketing
     (Waktu, Query, [User], RESPONSE_MESSAGE)
-    VALUES(dateadd(HOUR, 7, getdate()) , @query, @user, @responseMessage);`,
+    VALUES(getDate() , @query, @user, @responseMessage);`,
   GET_POST_STATISTIC_BY_POST_ID: `SELECT postId, followers, comments, 
     likes, shares, views, id, dayNumber, createdAt
     FROM MARKETING.dbo.Post_View
@@ -85,7 +85,7 @@ where a.[Kontrak Id] = @contractId`,
     a.[Kontrak Id] as contractId,
     b.Name as kolName,
     c.[Kontrak Ke] as contractNumber,
-    DATEDIFF(day, dateadd(HOUR, 7, getdate()) , [Masa Kontrak Akhir]) as dateDifference,
+    DATEDIFF(day, getDate() , [Masa Kontrak Akhir]) as dateDifference,
     a.[Booking Slot] as totalSlot,
     a.[Masa Kontrak Akhir] as contractEndDate,
     b.[No Whatsapp] as phoneNumber,
@@ -94,7 +94,7 @@ where a.[Kontrak Id] = @contractId`,
     FROM MARKETING.dbo.[Kol Kontrak] a
     JOIN MARKETING.dbo.Kol b ON b.[Kol Id] = a.[Kol Id]
     JOIN MARKETING.dbo.[Kol Kontrak Status] c ON c.[Kontrak Id] = a.[Kontrak Id] 
-    WHERE DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) <= 30 AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) ,[Masa Kontrak Akhir]) >=0`,
+    WHERE DATEDIFF(day, getDate() ,[Masa Kontrak Akhir]) <= 30 AND DATEDIFF(day, getDate() ,[Masa Kontrak Akhir]) >=0`,
   GET_BRIEF_DETAIL: `SELECT a.[Brief Id] as briefId,
     b.[Brief Code] AS briefCode,
     a.[Tema] as theme,
@@ -215,7 +215,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_NOT_UPLOADED_POST: `SELECT c.Name as kolName,
     a.[Tgl Post Sesuai Jadwal] as deadlineDate,
     c.[No Whatsapp] as phoneNumber,
-    DATEDIFF(day, dateadd(HOUR, 7, getdate()) , a.[Tgl Post Sesuai Jadwal]) as deadline
+    DATEDIFF(day, getDate() , a.[Tgl Post Sesuai Jadwal]) as deadline
     FROM MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak] b on a.[Kontrak Id] = b.[Kontrak Id] 
     JOIN MARKETING.dbo.Kol c on b.[Kol Id] = c.[Kol Id] 
@@ -264,7 +264,7 @@ where a.[Kontrak Id] = @contractId`,
     WHERE b.maxCpm = (COALESCE(d.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0))`,
   GET_BANK_LIST: 'SELECT * FROM MARKETING.dbo.bank',
   GET_ACTIVE_KOL: `select DISTINCT a.Name as kolName, a.[No Whatsapp] as phoneNumber, a.[Kol Id] as kolId, a.[Kategori Kol] as kolCategoryId, 
-  CAST(CASE WHEN b.[Kontrak Id] is NOT NULL AND DATEDIFF(day, dateadd(HOUR, 7, getdate()) , b.[Masa Kontrak Akhir] ) > 0  THEN 'YES' ELSE 'NO' END AS varchar) as isHasActiveContract
+  CAST(CASE WHEN b.[Kontrak Id] is NOT NULL AND DATEDIFF(day, getDate() , b.[Masa Kontrak Akhir] ) > 0  THEN 'YES' ELSE 'NO' END AS varchar) as isHasActiveContract
   from marketing.dbo.Kol a
   left Join MARKETING.dbo.[Kol Kontrak] b on a.[Kol Id] = b.[Kol Id]`,
   UPDATE_KOL: `UPDATE MARKETING.dbo.Kol

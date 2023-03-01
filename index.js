@@ -564,28 +564,25 @@ app.patch('/kontrak/:id', async (req, res) => {
 });
 
 // scheduler to update post statistic
-cron.schedule('0 1 * * *', async () => {
+cron.schedule('0 21 * * *', async () => {
   const date = new Date();
-  const gmtDate = date.setHours(date.getHours() + 7);
 
-  console.log('Running scheduler to update post statistics at: ', new Date(gmtDate));
+  console.log('Running scheduler to update post statistics at: ', new Date(date));
   await updatePostStatisticScheduler();
   console.log('Updating statistic done');
 });
 
 cron.schedule('0 9 * * *', async () => {
   const date = new Date();
-  const gmtDate = date.setHours(date.getHours() + 7);
 
-  console.log('Running scheduler for post reminder: ', new Date(gmtDate));
+  console.log('Running scheduler for post reminder: ', new Date(date));
   await postReminderScheduler();
 });
 
 cron.schedule('30 9 * * *', async () => {
   const date = new Date();
-  const gmtDate = date.setHours(date.getHours() + 7);
 
-  console.log('Running scheduler for contract reminder: ', new Date(gmtDate));
+  console.log('Running scheduler for contract reminder: ', new Date(date));
   await contractReminderScheduler();
 });
 
