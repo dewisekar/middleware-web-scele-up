@@ -1042,9 +1042,7 @@ const updatePostStatisticScheduler = async () => {
         shares: 0,
         views: 0
       };
-
-      await sleep(1000);
-      console.log('Fetching post statistic for link: ', linkPost);
+      console.log('Fetching post statistic for link: ', linkPost, postId);
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
@@ -1071,6 +1069,7 @@ const updatePostStatisticScheduler = async () => {
       };
 
       postsStatistics.push({ ...mappedInfo, ...postStatistic });
+      await sleep(2000);
     }
     console.log('ini', postsStatistics);
 
