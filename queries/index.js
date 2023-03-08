@@ -162,31 +162,31 @@ where a.[Kontrak Id] = @contractId`,
   COUNT(views) as numberOfPost, 
   SUM(c.[Cost Per Slot]) as totalCostPerSlot,
   COALESCE( SUM(c.[Cost Per Slot])/NULLIF (SUM(views), 0)*1000, 0) as avgCpm,
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)  as yearMonth
   FROM MARKETING.dbo.Post_View a
   JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
   JOIN MARKETING.dbo.[Kol Kontrak Status] c on b.[Kontrak Id] = c.[Kontrak Id] 
   where a.dayNumber = 7 and b.[Brief Id] = @briefId
   GROUP BY 
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)`,
   GET_OVERVIEW_BY_MANAGER_ID: `SELECT AVG(views) as avgViews, 
   SUM(views) as totalViews,
   COUNT(views) as numberOfPost, 
   SUM(c.[Cost Per Slot]) AS totalCostPerSlot,
    COALESCE( SUM(c.[Cost Per Slot])/NULLIF (SUM(views), 0)*1000, 0) as avgCpm,
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)  as yearMonth
   FROM MARKETING.dbo.Post_View a
   JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
   JOIN MARKETING.dbo.[Kol Kontrak Status] c on b.[Kontrak Id] = c.[Kontrak Id] 
   where a.dayNumber = 7 and b.[Manager Id] = @managerId
   GROUP BY 
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)`,
   GET_OVERVIEW_BY_KOL_CATEGORY_ID: `SELECT AVG(views) as avgViews, 
   SUM(views) as totalViews,
   COUNT(views) as numberOfPost, 
   SUM(c.[Cost Per Slot]) as totalCostPerSlot,
    COALESCE( SUM(c.[Cost Per Slot])/NULLIF (SUM(views), 0)*1000, 0) avgCpm,
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)  as yearMonth
   FROM MARKETING.dbo.Post_View a
   JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id] 
   JOIN MARKETING.dbo.[Kol Kontrak Status] c on b.[Kontrak Id] = c.[Kontrak Id] 
@@ -195,11 +195,11 @@ where a.[Kontrak Id] = @contractId`,
   JOIN MARKETING.dbo.KolCategory f on f.id = e.[Kategori Kol] 
   where a.dayNumber = 7 and f.id = @kolCategoryId
   GROUP BY 
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)`,
   GET_OVERVIEW_BY_KOL_ID: `SELECT AVG(views) as avgViews, 
   SUM(views) as totalViews,
   COUNT(views) as numberOfPost, 
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth,
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)  as yearMonth,
   SUM(e.[Cost Per Slot]) as totalCostPerSlot,
   COALESCE( SUM(e.[Cost Per Slot])/NULLIF (SUM(views), 0)*1000, 0) avgCpm
   FROM MARKETING.dbo.Post_View a
@@ -209,7 +209,7 @@ where a.[Kontrak Id] = @contractId`,
   JOIN MARKETING.dbo.[Kol Kontrak Status] e on e.[Kontrak Id] = b.[Kontrak Id] 
   where a.dayNumber = 7 and d.[Kol Id] = @kolId
   GROUP BY 
-  right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))`,
+  CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)`,
   GET_TOTAL_COST_AND_SLOT: `Select SUM(a.[Booking Slot]) as slot,
     SUM(a.[Total Kerjasama]) as cost
     From MARKETING.dbo.[Kol Kontrak] a`,
@@ -236,16 +236,16 @@ where a.[Kontrak Id] = @contractId`,
   UPDATE_FILE_MOU: `UPDATE MARKETING.dbo.[File Mou]
     SET [File Name]=@fileName, [Last Update Date]=GETDATE()
     WHERE [Contract Id]=@contractId;`,
-  GET_MAX_VIEW_PER_MONTH: `SELECT  a.postId, c.views, right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4)) as yearMonth,
+  GET_MAX_VIEW_PER_MONTH: `SELECT  a.postId, c.views, CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) as yearMonth,
     e.Name as kolName, e.Platform as platform
     from MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on b.[Post Id] = a.postId 
     JOIN (
-    SELECT max(a.views) as views, right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4)) as yearMonth
+    SELECT max(a.views) as views, CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) as yearMonth
     from MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on b.[Post Id] = a.postId 
-    GROUP BY right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))
-    ) as c on c.yearMonth = right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4)) and a.views = c.views
+    GROUP BY CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)
+    ) as c on c.yearMonth = CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) and a.views = c.views
     JOIN MARKETING.dbo.[Kol Kontrak] d on d.[Kontrak Id] = b.[Kontrak Id] 
     JOIN MARKETING.dbo.Kol e on e.[Kol Id] = d.[Kol Id] `,
   GET_MAX_CPM_PER_MONTH: `SELECT right('00' + CAST(MONTH(c.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(c.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth,
@@ -256,13 +256,13 @@ where a.[Kontrak Id] = @contractId`,
     JOIN
     (
     SELECT MAX(COALESCE(c.[Cost Per Slot]/NULLIF (a.views, 0)*1000, 0)) as maxCpm,
-    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))  as yearMonth
+    CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)  as yearMonth
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on a.postId = b.[Post Id]
     JOIN MARKETING.dbo.[Kol Kontrak Status] c on c.[Kontrak Id] = b.[Kontrak Id] 
     where a.dayNumber = 7
     GROUP BY 
-    right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))
+    CAST(YEAR(b.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(b.[Tgl Post Real]) AS VARCHAR(2)), 2)
     ) as b on b.yearMonth = right('00' + CAST(MONTH(c.[Tgl Post Real]) AS VARCHAR(2)), 2) +'-'+ CAST(YEAR(c.[Tgl Post Real]) AS VARCHAR(4)) 
     JOIN MARKETING.dbo.[Kol Kontrak] e on e.[Kontrak Id] = c.[Kontrak Id]
     JOIN MARKETING.dbo.Kol f on f.[Kol Id] = e.[Kol Id] 
