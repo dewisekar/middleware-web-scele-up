@@ -564,7 +564,7 @@ app.patch('/kontrak/:id', async (req, res) => {
 });
 
 // scheduler to update post statistic
-cron.schedule('0 21 * * *', async () => {
+cron.schedule('0 1 * * *', async () => {
   const date = new Date();
 
   console.log('Running scheduler to update post statistics at: ', new Date(date));
