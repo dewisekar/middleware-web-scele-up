@@ -1046,12 +1046,14 @@ const updatePostStatisticScheduler = async () => {
       const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
-      console.log('Fetched Statistic', fetchedStatistic);
+
+      console.log('Fetched Statistic', fetchedStatistic, postId);
       const { status, message } = fetchedStatistic;
 
-      if (status === 'false') {
+      if (status === 'false' || !message) {
         postsStatistics.push({ ...mappedInfo, ...emptyPost });
-        return;
+        // eslint-disable-next-line no-continue
+        continue;
       }
 
       const {
