@@ -961,7 +961,7 @@ const _insertPostStatistic = async (payload) => {
 const updatePostById = async (id, payload) => {
   const resp = { status: 'false' };
   const {
-    linkPost, deadlineDate, uploadDate, platform
+    linkPost, deadlineDate, uploadDate, platform, isFyp
   } = payload;
   const today = new Date();
   try {
@@ -974,6 +974,7 @@ const updatePostById = async (id, payload) => {
       .input('linkPost', linkPost)
       .input('deadlineDate', deadlineDate)
       .input('uploadDate', uploadDate)
+      .input('isFyp', isFyp)
       .query(query);
     console.log(result);
 
