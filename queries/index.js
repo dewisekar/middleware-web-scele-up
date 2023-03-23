@@ -85,6 +85,7 @@ where a.[Kontrak Id] = @contractId`,
   GET_CONTRACT_RENEWAL_LIST: `SELECT 
     a.[Kontrak Id] as contractId,
     b.Name as kolName,
+    b.platform as platform,
     c.[Kontrak Ke] as contractNumber,
     DATEDIFF(day, getDate() , [Masa Kontrak Akhir]) as dateDifference,
     a.[Booking Slot] as totalSlot,
