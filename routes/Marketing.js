@@ -579,7 +579,7 @@ const insertNewBrief = async (req) => {
     const { Script } = req;
     const { RefLink } = req;
     const { ManagerId } = req;
-    const { User } = req;
+    const { User, link } = req;
     const pool = await poolPromise;
 
     const result = await pool
@@ -590,6 +590,7 @@ const insertNewBrief = async (req) => {
       .input('linkReff', RefLink)
       .input('managerId', ManagerId)
       .input('User', User)
+      .input('link', link)
       .execute('[MARKETING].[dbo].[SP_InsertNewBrief]');
     console.log(result.recordset);
 
