@@ -103,7 +103,8 @@ where a.[Kontrak Id] = @contractId`,
     a.[Link Referensi Video] as reference,
     a.[Script] as script,
     b.[Brief Code]+ ' - ' + a.[Tema] as briefCodeTheme,
-    c.[Manager Name] as managerName
+    c.[Manager Name] as managerName,
+    a.link as link
     FROM  MARKETING.dbo.Brief a WITH(NOLOCK) 
     LEFT JOIN MARKETING.dbo.[Brief Status] b WITH(NOLOCK) on a.[Brief Id] = b.[Brief Id]
     LEFT JOIN MARKETING.dbo.[Kol Manager] c WITH(NOLOCK) on a.[Manager Id] = c.[Manager Id]
