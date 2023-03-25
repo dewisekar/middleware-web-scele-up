@@ -7,6 +7,7 @@ const fs = require('fs');
 
 const { poolPromise } = require('../utility/database');
 const { sendToTheQueue } = require('../utility/rabbitmq');
+const { getVideoAndUserStatistic } = require('./TiktokService');
 const { PYTHON_URL } = require('../config');
 const { QUERIES } = require('../queries/index');
 const PythonConnector = require('../connectors/PythonConnector');
@@ -1045,14 +1046,14 @@ const updatePostStatisticScheduler = async () => {
         views: 0
       };
       console.log('Fetching post statistic for link: ', linkPost, postId);
-      const fetchedStatistic = await PythonConnector.fetchPostStatistic(
+      const fetchedStatistic = await getVideoAndUserStatistic(
         linkPost
       );
 
       console.log('Fetched Statistic', fetchedStatistic, postId);
       const { status, message } = fetchedStatistic;
 
-      if (status === 'false' || !message) {
+      if (status === false || !message) {
         postsStatistics.push({ ...mappedInfo, ...emptyPost });
         // eslint-disable-next-line no-continue
         continue;

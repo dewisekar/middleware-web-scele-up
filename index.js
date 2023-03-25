@@ -63,6 +63,7 @@ const {
   updateKolById,
   updateKontrakById
 } = require('./routes/Marketing');
+const { getVideoAndUserStatistic } = require('./routes/TiktokService');
 // const multer = require("multer");
 const { upload } = require('./utility/multer');
 
@@ -563,8 +564,26 @@ app.patch('/kontrak/:id', async (req, res) => {
   res.send(result);
 });
 
+app.post('/kol/get-listing', async (req, res) => {
+  const { body: { username } } = req;
+  const result = await getVideoAndUserStatistic(username);
+  console.log('routes: POST /kol/get-listing');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+app.post('/tiktok/get-video-user-statistic', async (req, res) => {
+  const { body: { url } } = req;
+  const result = await getVideoAndUserStatistic(url);
+  console.log('routes: POST /kol/get-video-user-statisticg');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
 // scheduler to update post statistic
-cron.schedule('0 1 * * *', async () => {
+cron.schedule('0 1 0 * * *', async () => {
   const date = new Date();
 
   console.log('Running scheduler to update post statistics at: ', new Date(date));
