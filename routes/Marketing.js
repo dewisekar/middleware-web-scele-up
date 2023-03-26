@@ -1062,7 +1062,9 @@ const updatePostStatisticScheduler = async () => {
       const {
         user: { followerCount },
         video: {
-          commentCount, likeCount, shareCount, viewCount
+          stats: {
+            commentCount, likeCount, shareCount, viewCount
+          }
         }
       } = message;
       const postStatistic = {
