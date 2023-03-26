@@ -1,4 +1,7 @@
 const axios = require('axios');
+const jsdom = require('jsdom');
+
+const { JSDOM } = jsdom;
 const { poolPromise } = require('../utility/database');
 
 const headers = {
@@ -6,7 +9,9 @@ const headers = {
   origin: 'https://livecounts.io',
   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
   Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'Accept-Encoding': 'gzip, deflate, br'
+  'Accept-Encoding': 'gzip, deflate, br',
+  referer: 'https://www.tiktok.com/',
+  cookie: 'tt_webid_v2=BOB'
 };
 
 const parseShortTiktokUrl = async (url) => {
@@ -61,6 +66,26 @@ const _getUserStatisticById = async (userId) => {
   return axiosResponse.data;
 };
 
+const _getVideoStatisticFromTiktokPage = async (videoId, url) => {
+  const axiosResponse = await axios.request({
+    method: 'GET',
+    url,
+    headers
+  });
+  const page = axiosResponse.data.toString();
+  const dom = new JSDOM(page);
+  const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
+  const { ItemModule } = JSON.parse(sigiState);
+  const { stats } = ItemModule[videoId];
+  const {
+    diggCount: likeCount, shareCount, commentCount, playCount: viewCount
+  } = stats;
+
+  return {
+    likeCount, shareCount, commentCount, viewCount
+  };
+};
+
 const getVideoAndUserStatistic = async (url) => {
   try {
     let finalUrl = url;
@@ -72,20 +97,17 @@ const getVideoAndUserStatistic = async (url) => {
     const uncutId = regex[5].split('?');
     const videoId = uncutId[0];
 
-    const videoStatistic = await _getVideoStatistic(videoId);
-    const { author } = await _getVideoInfo(videoId);
-    const { userId } = author;
-    const userStatistic = await _getUserStatisticById(userId);
+    const video = await _getVideoStatisticFromTiktokPage(videoId, finalUrl);
 
     return {
       message: {
-        author,
-        video: videoStatistic,
-        user: userStatistic
+        video,
+        user: { followerCount: 0 }
       },
       status: true
     };
   } catch (error) {
+    console.log('error in fetching video stats:', error);
     return { status: false };
   }
 };
