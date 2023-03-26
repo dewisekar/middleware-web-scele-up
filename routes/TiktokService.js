@@ -82,30 +82,39 @@ const _getUserStatistic = async (username) => {
   return userStats;
 };
 
-const _getUserVideos = async (username) => {
+const _getUserVideos = async (username, costPerSlot, totalPost = 10) => {
   const axiosResponse = await axios.request({
     method: 'GET',
     url: `https://www.tiktok.com/@${username}`,
     headers
   });
+  let totalViews = 0;
+  const totalPrice = costPerSlot * totalPost;
 
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { ItemModule } = JSON.parse(sigiState);
   const keys = Object.keys(ItemModule);
-  console.log(keys);
 
   const videos = [];
 
   // eslint-disable-next-line no-plusplus
-  for (let j = 0; j < 10; j++) {
+  for (let j = 0; j < totalPost; j++) {
     const key = keys[j];
     const { stats } = ItemModule[key];
-    videos.push(stats);
-  }
+    const { playCount } = stats;
+    totalViews += playCount;
+    const cpm = (costPerSlot / playCount) * 1000;
 
-  return videos;
+    videos.push({ ...stats, id: key, cpm });
+  }
+  const avgCpm = (totalPrice / totalViews) * 1000;
+  const avgViews = totalViews / totalPost;
+
+  return {
+    totalViews, avgCpm, avgViews, videos
+  };
 };
 
 const _getVideoStatisticFromTiktokPage = async (videoId, url) => {
@@ -156,8 +165,29 @@ const getVideoAndUserStatistic = async (url) => {
   }
 };
 
+const getUserCpmByCost = async (username, costPerSlot) => {
+  try {
+    const { videos, ...otherInfo } = await _getUserVideos(username, costPerSlot);
+    const { followerCount } = await _getUserStatistic(`@${username}`);
+    const minCpm = Math.min(...videos.map((item) => item.cpm));
+    const { playCount: minViews } = videos.find((item) => item.cpm === minCpm);
+    const maxCpm = Math.max(...videos.map((item) => item.cpm));
+    const { playCount: maxViews } = videos.find((item) => item.cpm === maxCpm);
+
+    const data = {
+      ...otherInfo, costPerSlot, username, minCpm, minViews, maxCpm, maxViews, followerCount
+    };
+
+    return data;
+  } catch (error) {
+    console.log('error in fetching video stats:', error);
+    return { status: false };
+  }
+};
+
 module.exports = {
   getUserInfoByUsername,
   parseShortTiktokUrl,
-  getVideoAndUserStatistic
+  getVideoAndUserStatistic,
+  getUserCpmByCost
 };

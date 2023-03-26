@@ -1078,7 +1078,6 @@ const updatePostStatisticScheduler = async () => {
       postsStatistics.push({ ...mappedInfo, ...postStatistic });
       await sleep(2000);
     }
-    console.log('ini', postsStatistics);
 
     // eslint-disable-next-line no-return-await
     postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
