@@ -66,6 +66,48 @@ const _getUserStatisticById = async (userId) => {
   return axiosResponse.data;
 };
 
+const _getUserStatistic = async (username) => {
+  const axiosResponse = await axios.request({
+    method: 'GET',
+    url: `https://www.tiktok.com/${username}`,
+    headers
+  });
+
+  const page = axiosResponse.data.toString();
+  const dom = new JSDOM(page);
+  const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
+  const { UserModule: { stats } } = JSON.parse(sigiState);
+  const userStats = stats[username.split('@')[1]];
+
+  return userStats;
+};
+
+const _getUserVideos = async (username) => {
+  const axiosResponse = await axios.request({
+    method: 'GET',
+    url: `https://www.tiktok.com/@${username}`,
+    headers
+  });
+
+  const page = axiosResponse.data.toString();
+  const dom = new JSDOM(page);
+  const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
+  const { ItemModule } = JSON.parse(sigiState);
+  const keys = Object.keys(ItemModule);
+  console.log(keys);
+
+  const videos = [];
+
+  // eslint-disable-next-line no-plusplus
+  for (let j = 0; j < 10; j++) {
+    const key = keys[j];
+    const { stats } = ItemModule[key];
+    videos.push(stats);
+  }
+
+  return videos;
+};
+
 const _getVideoStatisticFromTiktokPage = async (videoId, url) => {
   const axiosResponse = await axios.request({
     method: 'GET',
@@ -96,13 +138,15 @@ const getVideoAndUserStatistic = async (url) => {
     const regex = finalUrl.split('/');
     const uncutId = regex[5].split('?');
     const videoId = uncutId[0];
+    const username = regex[3];
 
     const video = await _getVideoStatisticFromTiktokPage(videoId, finalUrl);
+    const user = await _getUserStatistic(username);
 
     return {
       message: {
         video,
-        user: { followerCount: 0 }
+        user
       },
       status: true
     };
