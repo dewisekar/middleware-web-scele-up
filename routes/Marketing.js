@@ -1046,14 +1046,14 @@ const updatePostStatisticScheduler = async () => {
         views: 0
       };
       console.log('Fetching post statistic for link: ', linkPost, postId);
-      const fetchedStatistic = await getVideoAndUserStatistic(
+      const fetchedStatistic = await PythonConnector.fetchPostStatistic(
         linkPost
       );
 
       console.log('Fetched Statistic', fetchedStatistic, postId);
       const { status, message } = fetchedStatistic;
 
-      if (status === false || !message) {
+      if (status === false || status === '201' || !message) {
         postsStatistics.push({ ...mappedInfo, ...emptyPost });
         // eslint-disable-next-line no-continue
         continue;
