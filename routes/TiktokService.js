@@ -194,10 +194,10 @@ const getUserCpmByCost = async (username, costPerSlot) => {
       ...otherInfo, costPerSlot, username, minCpm, minViews, maxCpm, maxViews, followerCount
     };
 
-    return data;
+    return { status: true, message: data };
   } catch (error) {
     console.log('error in fetching video stats:', error);
-    return { status: false };
+    return { status: false, error: error.response.status };
   }
 };
 
@@ -213,7 +213,7 @@ const fetchKolListing = async () => {
     };
   } catch (error) {
     console.log('error fetchKolListing" ', error);
-    return { status: false };
+    return { status: false, error: error.response.status };
   }
 };
 
