@@ -3,6 +3,7 @@ const jsdom = require('jsdom');
 
 const { JSDOM } = jsdom;
 const { poolPromise } = require('../utility/database');
+const { TIKTOK_QUERIES } = require('../queries/tiktok');
 
 const headers = {
   authority: 'tiktok.livecounts.io',
@@ -170,9 +171,24 @@ const getUserCpmByCost = async (username, costPerSlot) => {
     const { videos, ...otherInfo } = await _getUserVideos(username, costPerSlot);
     const { followerCount } = await _getUserStatistic(`@${username}`);
     const minCpm = Math.min(...videos.map((item) => item.cpm));
-    const { playCount: minViews } = videos.find((item) => item.cpm === minCpm);
+    const minViews = Math.min(...videos.map((item) => item.playCount));
     const maxCpm = Math.max(...videos.map((item) => item.cpm));
-    const { playCount: maxViews } = videos.find((item) => item.cpm === maxCpm);
+    const maxViews = Math.max(...videos.map((item) => item.playCount));
+
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('username', username)
+      .input('followers', followerCount)
+      .input('totalViews', otherInfo.totalViews)
+      .input('costPerSlot', costPerSlot)
+      .input('avgCpm', otherInfo.avgCpm)
+      .input('avgViews', otherInfo.avgViews)
+      .input('maxCpm', maxCpm)
+      .input('minCpm', minCpm)
+      .input('minViews', minViews)
+      .input('maxViews', maxViews)
+      .query(TIKTOK_QUERIES.INSERT_KOL_LISTING);
 
     const data = {
       ...otherInfo, costPerSlot, username, minCpm, minViews, maxCpm, maxViews, followerCount
@@ -185,9 +201,26 @@ const getUserCpmByCost = async (username, costPerSlot) => {
   }
 };
 
+const fetchKolListing = async () => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(TIKTOK_QUERIES.FETCH_KOL_LISTING);
+    const { recordset } = result;
+
+    return {
+      status: true,
+      message: recordset
+    };
+  } catch (error) {
+    console.log('error fetchKolListing" ', error);
+    return { status: false };
+  }
+};
+
 module.exports = {
   getUserInfoByUsername,
   parseShortTiktokUrl,
   getVideoAndUserStatistic,
-  getUserCpmByCost
+  getUserCpmByCost,
+  fetchKolListing
 };
