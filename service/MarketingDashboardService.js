@@ -1,25 +1,27 @@
-const axios = require('axios');
-
-const { JSDOM } = jsdom;
 const { poolPromise } = require('../utility/database');
-const { TIKTOK_QUERIES } = require('../queries/tiktok');
+const { QUERIES } = require('../queries/index');
 
-const fetchKolListing = async () => {
+const moduleName = 'MarketingDashboard';
+
+const getKolOverview = async () => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query(TIKTOK_QUERIES.FETCH_KOL_LISTING);
-    const { recordset } = result;
+    const { recordset: activeKol } = await pool.request().query(QUERIES.GET_NUMBER_OF_ACTIVE_KOL);
+    const { recordset: slotLeft } = await pool.request()
+      .query(QUERIES.GET_NUMBER_OF_AVAILABLE_SLOT);
 
-    return {
-      status: true,
-      message: recordset
-    };
+    const { numberOfActiveKol } = activeKol[0];
+    const { totalSlotLeft } = slotLeft[0];
+    const message = { numberOfActiveKol, totalSlotLeft };
+
+    return { status: true, message };
   } catch (error) {
-    console.log('error fetchKolListing" ', error);
+    console.log(`error ${moduleName}-getKolOverview:`, error);
+
     return { status: false, error: error.response.status };
   }
 };
 
 module.exports = {
-  fetchKolListing
+  getKolOverview
 };
