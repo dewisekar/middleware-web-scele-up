@@ -203,6 +203,7 @@ const getUserCpmByCost = async (username, costPerSlot) => {
 
 const fetchKolListing = async () => {
   try {
+    console.log('kepanggil');
     const pool = await poolPromise;
     const result = await pool.request().query(TIKTOK_QUERIES.FETCH_KOL_LISTING);
     const { recordset } = result;

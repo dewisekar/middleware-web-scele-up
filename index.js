@@ -1,9 +1,10 @@
 const express = require('express');
 
 const app = express();
-const port = 5000;
+const port = 5002;
 const cron = require('node-cron');
 const cors = require('cors');
+const routes = require('./routes');
 const {
   validateUsername,
   isExistDailyFile,
@@ -18,9 +19,9 @@ const {
   GetFormatTableGeneral,
   isExistFileResi,
   insertDailyFileResi
-} = require('./routes/ValidateUsername');
+} = require('./service/ValidateUsername');
 
-const { getRekapPengirimanByMonth } = require('./routes/Rekap');
+const { getRekapPengirimanByMonth } = require('./service/Rekap');
 const {
   insertNewKOL,
   getFormatListKol,
@@ -62,11 +63,11 @@ const {
   getActiveKol,
   updateKolById,
   updateKontrakById
-} = require('./routes/Marketing');
+} = require('./service/Marketing');
 const {
   getVideoAndUserStatistic, getUserCpmByCost,
   fetchKolListing
-} = require('./routes/TiktokService');
+} = require('./service/TiktokService');
 const { upload } = require('./utility/multer');
 
 const corsOptions = {
@@ -78,6 +79,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/', routes);
 
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: __dirname }); // server responds by sending the index.html file to the client's browser

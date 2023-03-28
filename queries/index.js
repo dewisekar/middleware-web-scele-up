@@ -285,7 +285,20 @@ where a.[Kontrak Id] = @contractId`,
   UPDATE_KONTRAK_STATUS: `UPDATE MARKETING.dbo.[Kol Kontrak Status]
   SET [Sub Media]=@subMedia
   WHERE [Kontrak Id]=@id;
-  `
+  `,
+  GET_NUMBER_OF_ACTIVE_KOL: `SELECT COUNT(DISTINCT(a.[Kol Id])) as numberActiveKol
+    from [Kol Kontrak] a
+    WHERE 
+    (
+      (a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL))>0
+      and YEAR(a.[Masa Kontrak Akhir]) >=2023
+    ) or a.[Masa Kontrak Akhir] >= GETDATE()`,
+  GET_NUMBER_OF_AVAILABLE_SLOT: `select SUM(b.sisaSlot) as totalSlotLeft from [Kol Kontrak] a
+    JOIN (SELECT (a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL)) as sisaSlot,
+    a.[Kontrak Id] as kontrakId
+    from [Kol Kontrak] a
+    WHERE ((a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id]))>0
+    and YEAR(a.[Masa Kontrak Akhir]) >=2023)) b on b.kontrakId = a.[Kontrak Id] `
 };
 
 module.exports = { QUERIES };
