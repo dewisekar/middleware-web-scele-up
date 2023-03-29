@@ -298,7 +298,17 @@ where a.[Kontrak Id] = @contractId`,
     a.[Kontrak Id] as kontrakId
     from  MARKETING.dbo.[Kol Kontrak] a
     WHERE ((a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id]))>0
-    and YEAR(a.[Masa Kontrak Akhir]) >=2023)) b on b.kontrakId = a.[Kontrak Id] `
+    and YEAR(a.[Masa Kontrak Akhir]) >=2023)) b on b.kontrakId = a.[Kontrak Id] `,
+  GET_PLANNED_SLOT_PER_YEAR: `SELECT SUM(b.[Cost Per Slot]) as totalSlotAvailable, MONTH(a.[Tgl Post Sesuai Jadwal]) as month
+    FROM MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
+    WHERE a.[Link Post] IS NULL AND YEAR(a.[Tgl Post Sesuai Jadwal]) = @year
+    GROUP BY MONTH(a.[Tgl Post Sesuai Jadwal])`,
+  GET_USED_SLOT_PER_YEAR: `SELECT SUM(b.[Cost Per Slot]) as totalSlotUsed, MONTH(a.[Tgl Post Sesuai Jadwal]) as month
+    FROM MARKETING.dbo.Post a
+    JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
+    WHERE a.[Link Post] IS NOT NULL AND YEAR(a.[Tgl Post Sesuai Jadwal]) = @year
+    GROUP BY MONTH(a.[Tgl Post Sesuai Jadwal])`
 };
 
 module.exports = { QUERIES };

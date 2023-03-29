@@ -994,7 +994,9 @@ const updatePostById = async (id, payload) => {
       const {
         user: { followerCount },
         video: {
-          commentCount, likeCount, shareCount, viewCount
+          stats: {
+            commentCount, likeCount, shareCount, viewCount
+          }
         }
       } = message;
       const postStatistic = {
