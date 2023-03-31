@@ -293,12 +293,12 @@ where a.[Kontrak Id] = @contractId`,
       (a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL))>0
       and YEAR(a.[Masa Kontrak Akhir]) >=2023
     ) or a.[Masa Kontrak Akhir] >= GETDATE()`,
-  GET_NUMBER_OF_AVAILABLE_SLOT: `select SUM(b.sisaSlot) as totalSlotLeft from  MARKETING.dbo.[Kol Kontrak] a
-    JOIN (SELECT (a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id] AND d.[Tgl Post Real] IS NOT NULL)) as sisaSlot,
-    a.[Kontrak Id] as kontrakId
-    from  MARKETING.dbo.[Kol Kontrak] a
-    WHERE ((a.[Booking Slot] - (SELECT COUNT(*) FROM MARKETING.dbo.Post d WHERE d.[Kontrak Id] = a.[Kontrak Id]))>0
-    and YEAR(a.[Masa Kontrak Akhir]) >=2023)) b on b.kontrakId = a.[Kontrak Id] `,
+  GET_NUMBER_OF_AVAILABLE_SLOT: `SELECT SUM((a.[Booking Slot]-b.totalUploadedPost)) as totalSlotLeft
+    from MARKETING.dbo.[Kol Kontrak] a
+    JOIN (SELECT COUNT(*) as totalUploadedPost, a.[Kontrak Id] as kontrakId
+    FROM MARKETING.dbo.Post a 
+    WHERE a.[Link Post] IS NOT NULL  group by a.[Kontrak Id]) b on b.kontrakId = a.[Kontrak Id] 
+    WHERE YEAR(a.[Masa Kontrak Mulai])>=2023 AND  (a.[Booking Slot]-b.totalUploadedPost)> 0`,
   GET_PLANNED_SLOT_PER_YEAR: `SELECT SUM(b.[Cost Per Slot]) as totalSlotAvailable, MONTH(a.[Tgl Post Sesuai Jadwal]) as month
     FROM MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
@@ -308,7 +308,12 @@ where a.[Kontrak Id] = @contractId`,
     FROM MARKETING.dbo.Post a
     JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
     WHERE a.[Link Post] IS NOT NULL AND YEAR(a.[Tgl Post Sesuai Jadwal]) = @year
-    GROUP BY MONTH(a.[Tgl Post Sesuai Jadwal])`
+    GROUP BY MONTH(a.[Tgl Post Sesuai Jadwal])`,
+  GET_NUMBER_OF_POSTS_OF_THE_MONTH: `SELECT COUNT(*) as totalPost FROM MARKETING.dbo.Post a
+    where YEAR(a.[Tgl Post Sesuai Jadwal]) = @year AND MONTH(a.[Tgl Post Sesuai Jadwal])=@month`,
+  GET_NUMBER_OF_POSTS_TO_BE_FOLLOWED_UP: `SELECT COUNT(*) as totalPost FROM MARKETING.dbo.Post a
+    WHERE( DATEDIFF(DAY, GETDATE(), a.[Tgl Post Sesuai Jadwal])=0 AND a.[Link Post] is NULL ) 
+    OR (a.[Tgl Post Sesuai Jadwal] < GETDATE() AND a.[Link Post] IS NULL)`
 };
 
 module.exports = { QUERIES };

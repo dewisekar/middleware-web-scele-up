@@ -65,7 +65,24 @@ const getSlotUsagePerYear = async (year) => {
       message: { monthLabel, planned, used }
     };
   } catch (error) {
-    console.log(`error ${moduleName}-getKolOverview:`, error);
+    console.log(`error ${moduleName}-getSlotUsagePerYear:`, error);
+
+    return { status: false, error: error.response.status };
+  }
+};
+
+const getMonthlyPostOverview = async (month, year) => {
+  try {
+    const pool = await poolPromise;
+    const { recordset: [numberOfPost] } = await pool.request().input('year', year).input('month', month).query(QUERIES.GET_NUMBER_OF_POSTS_OF_THE_MONTH);
+    const { recordset: [numberPostToBeFollowedUp] } = await pool.request().input('year', year).input('month', month).query(QUERIES.GET_NUMBER_OF_POSTS_TO_BE_FOLLOWED_UP);
+
+    return {
+      status: true,
+      message: { numberOfPost, numberPostToBeFollowedUp }
+    };
+  } catch (error) {
+    console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
 
     return { status: false, error: error.response.status };
   }
@@ -73,5 +90,6 @@ const getSlotUsagePerYear = async (year) => {
 
 module.exports = {
   getKolOverview,
-  getSlotUsagePerYear
+  getSlotUsagePerYear,
+  getMonthlyPostOverview
 };
