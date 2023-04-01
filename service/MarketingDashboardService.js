@@ -1,5 +1,6 @@
 const { poolPromise } = require('../utility/database');
 const { QUERIES } = require('../queries/index');
+const { DASHBOARD_QUERIES } = require('../queries/dashboard');
 
 const moduleName = 'MarketingDashboard';
 const months = [{ id: 1, value: 'Januari' },
@@ -88,8 +89,31 @@ const getMonthlyPostOverview = async (month, year) => {
   }
 };
 
+const getTotalViewsByYearAndManager = async (year, managerId) => {
+  try {
+    const pool = await poolPromise;
+    const { recordset } = await pool.request().input('year', year).input('managerId', managerId).query(DASHBOARD_QUERIES.GET_TOTAL_VIEWS_BY_YEAR_AND_MANAGER);
+
+    const result = recordset.map((item) => {
+      const { month } = item;
+      const monthString = months.find(({ id }) => id === month);
+      return { ...item, month: monthString.value };
+    });
+
+    return {
+      status: true,
+      message: result
+    };
+  } catch (error) {
+    console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
+
+    return { status: false, error: error.response.status };
+  }
+};
+
 module.exports = {
   getKolOverview,
   getSlotUsagePerYear,
-  getMonthlyPostOverview
+  getMonthlyPostOverview,
+  getTotalViewsByYearAndManager
 };
