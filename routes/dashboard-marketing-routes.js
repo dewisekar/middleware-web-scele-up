@@ -5,7 +5,7 @@ const router = Router();
 
 const {
   getKolOverview, getSlotUsagePerYear, getMonthlyPostOverview,
-  getTotalViewsByYearAndManager
+  getTotalViewsByYearAndManager, getPostReminder
 } = require('../service/MarketingDashboardService');
 
 const baseRoutes = '/marketing/dashboard/';
@@ -41,7 +41,18 @@ router.get(`${baseRoutes}total-views`, async (req, res) => {
   const managerIdForQuery = managerId === 'ALL' ? null : managerId;
 
   const result = await getTotalViewsByYearAndManager(year, managerIdForQuery);
-  console.log(`routes:/${baseRoutes}monthly-post-usage/year/:year/month/:month`);
+  console.log(`routes:/${baseRoutes}total-views`);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.get(`${baseRoutes}post-reminder`, async (req, res) => {
+  const { query: { managerId = null } } = req;
+  const managerIdForQuery = managerId === 'ALL' ? null : managerId;
+
+  const result = await getPostReminder(managerIdForQuery);
+  console.log(`routes:/${baseRoutes}post-reminder`);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

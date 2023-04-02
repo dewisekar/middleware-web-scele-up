@@ -94,15 +94,34 @@ const getTotalViewsByYearAndManager = async (year, managerId) => {
     const pool = await poolPromise;
     const { recordset } = await pool.request().input('year', year).input('managerId', managerId).query(DASHBOARD_QUERIES.GET_TOTAL_VIEWS_BY_YEAR_AND_MANAGER);
 
-    const result = recordset.map((item) => {
-      const { month } = item;
+    const views = [];
+    const monthLabel = [];
+    recordset.forEach((item) => {
+      const { month, totalViews } = item;
       const monthString = months.find(({ id }) => id === month);
-      return { ...item, month: monthString.value };
+      views.push(totalViews);
+      monthLabel.push(monthString.value);
     });
 
     return {
       status: true,
-      message: result
+      message: { totalViews: views, month: monthLabel }
+    };
+  } catch (error) {
+    console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
+
+    return { status: false, error: error.response.status };
+  }
+};
+
+const getPostReminder = async (managerId) => {
+  try {
+    const pool = await poolPromise;
+    const { recordset } = await pool.request().input('managerId', managerId).query(DASHBOARD_QUERIES.GET_FOLLOWED_UP_POSTS);
+
+    return {
+      status: true,
+      message: recordset
     };
   } catch (error) {
     console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
@@ -115,5 +134,6 @@ module.exports = {
   getKolOverview,
   getSlotUsagePerYear,
   getMonthlyPostOverview,
-  getTotalViewsByYearAndManager
+  getTotalViewsByYearAndManager,
+  getPostReminder
 };
