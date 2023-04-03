@@ -5,7 +5,7 @@ const router = Router();
 
 const {
   getKolOverview, getSlotUsagePerYear, getMonthlyPostOverview,
-  getTotalViewsByYearAndManager, getPostReminder
+  getTotalViewsByYearAndManager, getPostReminder, getTotalViewsPerCategory
 } = require('../service/MarketingDashboardService');
 
 const baseRoutes = '/marketing/dashboard/';
@@ -53,6 +53,17 @@ router.get(`${baseRoutes}post-reminder`, async (req, res) => {
 
   const result = await getPostReminder(managerIdForQuery);
   console.log(`routes:/${baseRoutes}post-reminder`);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.get(`${baseRoutes}views-per-category`, async (req, res) => {
+  const { query: { managerId = null } } = req;
+  const managerIdForQuery = managerId === 'ALL' ? null : managerId;
+
+  const result = await getTotalViewsPerCategory(managerIdForQuery);
+  console.log(`routes:/${baseRoutes}views-per-category`);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

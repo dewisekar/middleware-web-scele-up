@@ -130,10 +130,38 @@ const getPostReminder = async (managerId) => {
   }
 };
 
+const getTotalViewsPerCategory = async (managerId) => {
+  try {
+    const pool = await poolPromise;
+    const { recordset } = await pool.request().input('managerId', managerId).query(DASHBOARD_QUERIES.GET_TOTAL_VIEWS_PER_CATEGORY_ALL_TIME);
+
+    const views = [];
+    const label = [];
+    const usage = [];
+    recordset.forEach((item) => {
+      const { category, totalViews, totalUsage } = item;
+
+      views.push(totalViews);
+      label.push(category);
+      usage.push(totalUsage);
+    });
+
+    return {
+      status: true,
+      message: { totalViews: views, totalUsage: usage, label }
+    };
+  } catch (error) {
+    console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
+
+    return { status: false, error: error.response.status };
+  }
+};
+
 module.exports = {
   getKolOverview,
   getSlotUsagePerYear,
   getMonthlyPostOverview,
   getTotalViewsByYearAndManager,
-  getPostReminder
+  getPostReminder,
+  getTotalViewsPerCategory
 };
