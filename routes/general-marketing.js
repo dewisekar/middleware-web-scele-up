@@ -39,7 +39,8 @@ const {
   getBankList,
   getActiveKol,
   updateKolById,
-  updateKontrakById
+  updateKontrakById,
+  addCategory
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -360,6 +361,15 @@ router.patch('/kontrak/:id', async (req, res) => {
   console.log('id', id);
   const result = await updateKontrakById(id, body);
   console.log('routes: GET /kontrak/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.post('/kol/category', async (req, res) => {
+  const { body } = req;
+  const result = await addCategory(body);
+  console.log('routes:/kol/category');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

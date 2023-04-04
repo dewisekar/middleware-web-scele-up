@@ -309,11 +309,13 @@ where a.[Kontrak Id] = @contractId`,
     JOIN MARKETING.dbo.[Kol Kontrak Status] b on a.[Kontrak Id] = b.[Kontrak Id] 
     WHERE a.[Link Post] IS NOT NULL AND YEAR(a.[Tgl Post Sesuai Jadwal]) = @year
     GROUP BY MONTH(a.[Tgl Post Sesuai Jadwal])`,
-  GET_NUMBER_OF_POSTS_OF_THE_MONTH: `SELECT COUNT(*) as totalPost FROM MARKETING.dbo.Post a
+  GET_NUMBER_OF_POSTS_OF_THE_MONTH: `SELECT COUNT(*) as wtotalPost FROM MARKETING.dbo.Post a
     where YEAR(a.[Tgl Post Sesuai Jadwal]) = @year AND MONTH(a.[Tgl Post Sesuai Jadwal])=@month`,
   GET_NUMBER_OF_POSTS_TO_BE_FOLLOWED_UP: `SELECT COUNT(*) as totalPost FROM MARKETING.dbo.Post a
     WHERE( DATEDIFF(DAY, GETDATE(), a.[Tgl Post Sesuai Jadwal])=0 AND a.[Link Post] is NULL ) 
-    OR (a.[Tgl Post Sesuai Jadwal] < GETDATE() AND a.[Link Post] IS NULL)`
+    OR (a.[Tgl Post Sesuai Jadwal] < GETDATE() AND a.[Link Post] IS NULL)`,
+  GET_KOL_CATEGORY_BY_NAME: 'SELECT id, category, createdAt FROM MARKETING.dbo.KolCategory WHERE category = @category AND (@id is null or id = @id)',
+  INSERT_KOL_CATEGORY: 'INSERT INTO MARKETING.dbo.KolCategory (category, createdAt) VALUES(@category, GETDATE())'
 };
 
 module.exports = { QUERIES };

@@ -1569,6 +1569,49 @@ const updateKontrakById = async (id, payload) => {
   }
 };
 
+const _checkIfCategoryIsUnique = async (category, id = null) => {
+  try {
+    const pool = await poolPromise;
+
+    const { recordset } = await pool
+      .request()
+      .input('category', category)
+      .input('id', id)
+      .query(QUERIES.GET_KOL_CATEGORY_BY_NAME);
+    const isUnique = recordset.length === 0;
+
+    return isUnique;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const addCategory = async (req) => {
+  const resp = { status: 'false' };
+  try {
+    const { category } = req;
+
+    const isUnique = await _checkIfCategoryIsUnique(category);
+
+    if (!isUnique) {
+      return { status: 'false', message: 'Nama kategori telah ada! Gunakan nama lain' };
+    }
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('category', category)
+      .query(QUERIES.INSERT_KOL_CATEGORY);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menambahkan kategori KOL';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1609,5 +1652,6 @@ module.exports = {
   getBankList,
   getActiveKol,
   updateKolById,
-  updateKontrakById
+  updateKontrakById,
+  addCategory
 };
