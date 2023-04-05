@@ -314,8 +314,9 @@ where a.[Kontrak Id] = @contractId`,
   GET_NUMBER_OF_POSTS_TO_BE_FOLLOWED_UP: `SELECT COUNT(*) as totalPost FROM MARKETING.dbo.Post a
     WHERE( DATEDIFF(DAY, GETDATE(), a.[Tgl Post Sesuai Jadwal])=0 AND a.[Link Post] is NULL ) 
     OR (a.[Tgl Post Sesuai Jadwal] < GETDATE() AND a.[Link Post] IS NULL)`,
-  GET_KOL_CATEGORY_BY_NAME: 'SELECT id, category, createdAt FROM MARKETING.dbo.KolCategory WHERE category = @category AND (@id is null or id = @id)',
-  INSERT_KOL_CATEGORY: 'INSERT INTO MARKETING.dbo.KolCategory (category, createdAt) VALUES(@category, GETDATE())'
+  GET_KOL_CATEGORY_BY_NAME: 'SELECT id, category, createdAt FROM MARKETING.dbo.KolCategory WHERE category = @category AND (@id is null or id != @id)',
+  INSERT_KOL_CATEGORY: 'INSERT INTO MARKETING.dbo.KolCategory (category, createdAt) VALUES(@category, GETDATE())',
+  UPDATE_KOL_CATEGORY: 'UPDATE MARKETING.dbo.KolCategory SET category=@category WHERE id=@id; '
 };
 
 module.exports = { QUERIES };

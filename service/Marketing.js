@@ -1578,6 +1578,7 @@ const _checkIfCategoryIsUnique = async (category, id = null) => {
       .input('category', category)
       .input('id', id)
       .query(QUERIES.GET_KOL_CATEGORY_BY_NAME);
+    console.log('ini recordset', recordset);
     const isUnique = recordset.length === 0;
 
     return isUnique;
@@ -1604,6 +1605,61 @@ const addCategory = async (req) => {
 
     resp.status = 'true';
     resp.message = 'Berhasil menambahkan kategori KOL';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const deleteCategory = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    const { recordset: isUsed } = await pool
+      .request()
+      .input('id', id)
+      .query('SELECT * FROM MARKETING.dbo.Kol where [Kategori Kol]=@id');
+
+    if (isUsed.length !== 0) {
+      return { status: 'false', message: 'Kategori digunakan oleh KOL.' };
+    }
+
+    await pool
+      .request()
+      .input('id', id)
+      .query('DELETE FROM MARKETING.dbo.kolCategory where id=@id');
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menghapus kategori KOL';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const editCategory = async (id, body) => {
+  const resp = { status: 'false' };
+  try {
+    const { category } = body;
+
+    const isUnique = await _checkIfCategoryIsUnique(category, id);
+
+    if (!isUnique) {
+      return { status: 'false', message: 'Nama kategori telah ada! Gunakan nama lain' };
+    }
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('category', category)
+      .input('id', id)
+      .query(QUERIES.UPDATE_KOL_CATEGORY);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil memperbarui kategori KOL';
 
     return resp;
   } catch (err) {
@@ -1653,5 +1709,7 @@ module.exports = {
   getActiveKol,
   updateKolById,
   updateKontrakById,
-  addCategory
+  addCategory,
+  editCategory,
+  deleteCategory
 };
