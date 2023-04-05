@@ -16,7 +16,8 @@ const QUERIES = {
     g.[Manager Id] as managerId,
     d.[Kontrak Ke]  as contractNumber,
     d.[Cost Per Slot] as costPerSlot,
-    a.isFyp as isFyp
+    a.isFyp as isFyp,
+    a.isFreeSlot as isFreeSlot
     FROM [MARKETING].dbo.Post a
     JOIN [MARKETING].dbo.[Kol Kontrak] b WITH(NOLOCK) on a.[Kontrak Id] = b.[Kontrak Id]
     JOIN [MARKETING].dbo.Kol c WITH(NOLOCK) on b.[Kol Id] = c.[Kol Id] 
@@ -59,7 +60,7 @@ JOIN MARKETING.dbo.[KolCategory] f on f.[id] = b.[Kategori Kol]
 JOIN MARKETING.dbo.bank g on g.[code] = b.[BANK] 
 where a.[Kontrak Id] = @contractId`,
   UPDATE_POST_QUERY: `UPDATE MARKETING.dbo.Post
-    SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=getDate(), [isFyp] = @isFyp 
+    SET [Tgl Post Sesuai Jadwal]=@deadlineDate, [Tgl Post Real]=@uploadDate, [Link Post]=@linkPost, LastUpdateStats=getDate(), [isFyp] = @isFyp, [isFreeSlot] = @isFreeSlot 
     WHERE [Post Id]=@postId;`,
   GET_UPLOADED_POST: `SELECT a.[Post Id] as postId, 
   a.[Tgl Post Sesuai Jadwal] as deadlineDate, 

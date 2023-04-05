@@ -758,7 +758,7 @@ const insertNewPost = async (req) => {
   const resp = { status: 'false' };
   try {
     const {
-      KontrakId, ManagerId, BriefId, TglPostKontrak, User
+      KontrakId, ManagerId, BriefId, TglPostKontrak, User, isFreeSlot
     } = req;
     const pool = await poolPromise;
 
@@ -769,6 +769,7 @@ const insertNewPost = async (req) => {
       .input('BriefId', BriefId)
       .input('TglPostKontrak', TglPostKontrak)
       .input('User', User)
+      .input('isFreeSlot', isFreeSlot)
       .execute('[MARKETING].[dbo].[SP_InsertNewPost]');
     console.log('[SP_InsertNewPost] result:', result.recordset);
 
@@ -963,7 +964,7 @@ const _insertPostStatistic = async (payload) => {
 const updatePostById = async (id, payload) => {
   const resp = { status: 'false' };
   const {
-    linkPost, deadlineDate, uploadDate, platform, isFyp
+    linkPost, deadlineDate, uploadDate, platform, isFyp, isFreeSlot
   } = payload;
   const today = new Date();
   try {
@@ -977,6 +978,7 @@ const updatePostById = async (id, payload) => {
       .input('deadlineDate', deadlineDate)
       .input('uploadDate', uploadDate)
       .input('isFyp', isFyp)
+      .input('isFreeSlot', isFreeSlot)
       .query(query);
     console.log(result);
 
