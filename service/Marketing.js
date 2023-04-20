@@ -782,7 +782,6 @@ const updateManager = async (id, payload) => {
     const {
       managerName, noWhatsApp, email, alias, roles, noKTP
     } = payload;
-    console.log('ini payload', payload);
     const pool = await poolPromise;
     const query = `UPDATE MARKETING.dbo.[Kol Manager]
     SET [Manager Name]='${managerName}', [Phone Number]='${noWhatsApp}', EMAIL='${email}', ALIAS='${alias}', ROLES='${roles}', NoKTP='${noKTP}'
@@ -794,6 +793,30 @@ const updateManager = async (id, payload) => {
 
     resp.status = 'true';
 
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
+const deleteManager = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    const checkContractExistQuery = `SELECT * from MARKETING.dbo.[Kol Kontrak] WHERE [Manager Id]=${id};`;
+
+    const { recordset: contract } = await pool.request().query(checkContractExistQuery);
+    if (contract.length > 0) {
+      resp.message = 'Tidak dapat menghapus manager. Manager mempunyai data kontrak';
+      return resp;
+    }
+
+    const deleteQuery = `DELETE FROM MARKETING.dbo.[Kol Manager] WHERE [Manager Id]=${id};`;
+    await pool.request().query(deleteQuery);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menghapus manager';
     return resp;
   } catch (err) {
     console.error(err);
@@ -1762,5 +1785,6 @@ module.exports = {
   editCategory,
   deleteCategory,
   getManagerDetail,
-  updateManager
+  updateManager,
+  deleteManager
 };

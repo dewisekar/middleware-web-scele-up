@@ -44,7 +44,8 @@ const {
   editCategory,
   deleteCategory,
   getManagerDetail,
-  updateManager
+  updateManager,
+  deleteManager
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -215,6 +216,16 @@ router.put('/manager/:id', async (req, res) => {
   const { params: { id }, body } = req;
 
   const result = await updateManager(id, body);
+  console.log('routes:/manager/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.delete('/manager/:id', async (req, res) => {
+  const { params: { id } } = req;
+
+  const result = await deleteManager(id);
   console.log('routes:/manager/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
