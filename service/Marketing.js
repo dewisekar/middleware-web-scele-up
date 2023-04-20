@@ -776,6 +776,31 @@ const getManagerDetail = async (id) => {
   }
 };
 
+const updateManager = async (id, payload) => {
+  const resp = { status: 'false' };
+  try {
+    const {
+      managerName, noWhatsApp, email, alias, roles, noKTP
+    } = payload;
+    console.log('ini payload', payload);
+    const pool = await poolPromise;
+    const query = `UPDATE MARKETING.dbo.[Kol Manager]
+    SET [Manager Name]='${managerName}', [Phone Number]='${noWhatsApp}', EMAIL='${email}', ALIAS='${alias}', ROLES='${roles}', NoKTP='${noKTP}'
+    WHERE [Manager Id]=${id};`;
+
+    await pool
+      .request()
+      .query(query);
+
+    resp.status = 'true';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 const insertNewPost = async (req) => {
   const resp = { status: 'false' };
   try {
@@ -1736,5 +1761,6 @@ module.exports = {
   addCategory,
   editCategory,
   deleteCategory,
-  getManagerDetail
+  getManagerDetail,
+  updateManager
 };

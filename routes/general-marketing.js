@@ -43,7 +43,8 @@ const {
   addCategory,
   editCategory,
   deleteCategory,
-  getManagerDetail
+  getManagerDetail,
+  updateManager
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -205,6 +206,16 @@ router.get('/manager/detail/:id', async (req, res) => {
 
   const result = await getManagerDetail(id);
   console.log('routes:/manager/detail/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.put('/manager/:id', async (req, res) => {
+  const { params: { id }, body } = req;
+
+  const result = await updateManager(id, body);
+  console.log('routes:/manager/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);
