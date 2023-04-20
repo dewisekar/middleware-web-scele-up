@@ -42,7 +42,8 @@ const {
   updateKontrakById,
   addCategory,
   editCategory,
-  deleteCategory
+  deleteCategory,
+  getManagerDetail
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -194,6 +195,16 @@ router.get('/getFormatList', async (req, res) => {
 router.get('/getListManager', async (req, res) => {
   const result = await getListManager();
   console.log('routes:/getListManager');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.get('/manager/detail/:id', async (req, res) => {
+  const { params: { id } } = req;
+
+  const result = await getManagerDetail(id);
+  console.log('routes:/manager/detail/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

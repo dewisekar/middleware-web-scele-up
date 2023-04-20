@@ -754,6 +754,28 @@ const getListManager = async () => {
   }
 };
 
+const getManagerDetail = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    const query = `SELECT [Manager Id], [Manager Name], [Phone Number], EMAIL, ALIAS, ROLES, NoKTP
+    FROM MARKETING.dbo.[Kol Manager] where [Manager Id]=${id};`;
+
+    const result = await pool
+      .request()
+      .query(query);
+
+    const { recordset } = result;
+    const [firstRecord] = recordset;
+    resp.message = firstRecord;
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 const insertNewPost = async (req) => {
   const resp = { status: 'false' };
   try {
@@ -1713,5 +1735,6 @@ module.exports = {
   updateKontrakById,
   addCategory,
   editCategory,
-  deleteCategory
+  deleteCategory,
+  getManagerDetail
 };
