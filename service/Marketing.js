@@ -3,11 +3,9 @@
 /* eslint-disable guard-for-in */
 const axios = require('axios');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 
 const { poolPromise } = require('../utility/database');
 const { sendToTheQueue } = require('../utility/rabbitmq');
-const { getVideoAndUserStatistic } = require('./TiktokService');
 const { PYTHON_URL } = require('../config');
 const { QUERIES } = require('../queries/index');
 const PythonConnector = require('../connectors/PythonConnector');
@@ -1740,6 +1738,29 @@ const editCategory = async (id, body) => {
   }
 };
 
+const deletePost = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('id', id)
+      .query(QUERIES.DELETE_POST_VIEW);
+    await pool
+      .request()
+      .input('id', id)
+      .query(QUERIES.DELETE_POST);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menghapus post ';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1786,5 +1807,6 @@ module.exports = {
   deleteCategory,
   getManagerDetail,
   updateManager,
-  deleteManager
+  deleteManager,
+  deletePost
 };

@@ -317,7 +317,9 @@ where a.[Kontrak Id] = @contractId`,
     OR (a.[Tgl Post Sesuai Jadwal] < GETDATE() AND a.[Link Post] IS NULL)`,
   GET_KOL_CATEGORY_BY_NAME: 'SELECT id, category, createdAt FROM MARKETING.dbo.KolCategory WHERE category = @category AND (@id is null or id != @id)',
   INSERT_KOL_CATEGORY: 'INSERT INTO MARKETING.dbo.KolCategory (category, createdAt) VALUES(@category, GETDATE())',
-  UPDATE_KOL_CATEGORY: 'UPDATE MARKETING.dbo.KolCategory SET category=@category WHERE id=@id; '
+  UPDATE_KOL_CATEGORY: 'UPDATE MARKETING.dbo.KolCategory SET category=@category WHERE id=@id; ',
+  DELETE_POST_VIEW: 'DELETE FROM MARKETING.dbo.Post_View where postId=@id',
+  DELETE_POST: 'DELETE FROM MARKETING.dbo.Post where [Post Id]=@id'
 };
 
 module.exports = { QUERIES };

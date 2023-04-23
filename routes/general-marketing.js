@@ -45,7 +45,8 @@ const {
   deleteCategory,
   getManagerDetail,
   updateManager,
-  deleteManager
+  deleteManager,
+  deletePost
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -424,6 +425,16 @@ router.delete('/kol/category/:id', async (req, res) => {
   const result = await deleteCategory(id);
   console.log('routes:/kol/category');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.delete('/post/:id', async (req, res) => {
+  const { params: { id } } = req;
+
+  const result = await deletePost(id);
+  console.log('routes:/post/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);
 });
