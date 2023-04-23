@@ -18,6 +18,7 @@ const {
   getInvoiceReminderTemplate
 } = require('../message-template');
 const { convertDate, DateMode, convertToIdr } = require('../utils');
+const { post } = require('../routes/general-marketing');
 
 const sendEmail = async (receiverEmail, subject, content) => {
   let response = 'failed';
@@ -1761,6 +1762,43 @@ const deletePost = async (id) => {
   }
 };
 
+const deleteContract = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    const { recordset: posts } = await pool
+      .request()
+      .query(`select * from MARKETING.dbo.Post where [Kontrak Id]=${id}`);
+
+    for (const item of posts) {
+      const postId = item['Post Id'];
+      await pool
+        .request()
+        .input('id', postId)
+        .query(QUERIES.DELETE_POST_VIEW);
+      await pool
+        .request()
+        .input('id', postId)
+        .query(QUERIES.DELETE_POST);
+    }
+
+    await pool
+      .request()
+      .query(`delete from [MARKETING].dbo.[Kol Kontrak Status] where [Kontrak Id]=${id}`);
+    await pool
+      .request()
+      .query(`delete from [MARKETING].dbo.[Kol Kontrak] where [Kontrak Id]=${id}`);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menghapus post ';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 module.exports = {
   insertNewKOL,
   getFormatListKol,
@@ -1808,5 +1846,6 @@ module.exports = {
   getManagerDetail,
   updateManager,
   deleteManager,
-  deletePost
+  deletePost,
+  deleteContract
 };

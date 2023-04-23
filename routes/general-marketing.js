@@ -46,7 +46,8 @@ const {
   getManagerDetail,
   updateManager,
   deleteManager,
-  deletePost
+  deletePost,
+  deleteContract
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -434,6 +435,16 @@ router.delete('/post/:id', async (req, res) => {
 
   const result = await deletePost(id);
   console.log('routes:/post/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.delete('/contract/:id', async (req, res) => {
+  const { params: { id } } = req;
+
+  const result = await deleteContract(id);
+  console.log('routes:/contract/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);
