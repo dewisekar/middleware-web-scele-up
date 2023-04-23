@@ -1790,7 +1790,7 @@ const deleteContract = async (id) => {
       .query(`delete from [MARKETING].dbo.[Kol Kontrak] where [Kontrak Id]=${id}`);
 
     resp.status = 'true';
-    resp.message = 'Berhasil menghapus post ';
+    resp.message = 'Berhasil menghapus kontrak';
 
     return resp;
   } catch (err) {

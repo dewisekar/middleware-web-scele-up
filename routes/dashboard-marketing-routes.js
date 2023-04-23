@@ -59,10 +59,13 @@ router.get(`${baseRoutes}post-reminder`, async (req, res) => {
 });
 
 router.get(`${baseRoutes}views-per-category`, async (req, res) => {
-  const { query: { managerId = null } } = req;
+  const { query: { managerId = null, startDate = null, endDate = null } } = req;
   const managerIdForQuery = managerId === 'ALL' ? null : managerId;
+  const startDateForQuery = startDate === 'ALL' ? null : startDate;
+  const endDateForQuery = endDate === 'ALL' ? null : endDate;
 
-  const result = await getTotalViewsPerCategory(managerIdForQuery);
+  const result = await
+  getTotalViewsPerCategory(managerIdForQuery, startDateForQuery, endDateForQuery);
   console.log(`routes:/${baseRoutes}views-per-category`);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);

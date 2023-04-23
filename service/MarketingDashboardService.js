@@ -130,10 +130,14 @@ const getPostReminder = async (managerId) => {
   }
 };
 
-const getTotalViewsPerCategory = async (managerId) => {
+const getTotalViewsPerCategory = async (managerId, startDate, endDate) => {
   try {
     const pool = await poolPromise;
-    const { recordset } = await pool.request().input('managerId', managerId).query(DASHBOARD_QUERIES.GET_TOTAL_VIEWS_PER_CATEGORY_ALL_TIME);
+    const { recordset } = await pool.request()
+      .input('managerId', managerId)
+      .input('startDate', startDate)
+      .input('endDate', endDate)
+      .query(DASHBOARD_QUERIES.GET_TOTAL_VIEWS_PER_CATEGORY_ALL_TIME);
 
     const views = [];
     const label = [];
