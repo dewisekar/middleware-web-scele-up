@@ -149,7 +149,6 @@ const getTotalViewsPerCategory = async (managerId, startDate, endDate) => {
       label.push(category);
       usage.push(totalUsage);
     });
-
     return {
       status: true,
       message: { totalViews: views, totalUsage: usage, label }

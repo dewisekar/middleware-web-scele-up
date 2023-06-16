@@ -30,7 +30,7 @@ const DASHBOARD_QUERIES = {
     JOIN MARKETING.dbo.Kol d on d.[Kol Id] = c.[Kol Id] 
     JOIN MARKETING.dbo.KolCategory e on e.id = d.[Kategori Kol] 
     WHERE a.dayNumber = 7 AND (@managerId is null or b.[Manager Id] = @managerId)
-    AND (@startDate is null or b.[Tgl Post Real] >= @startDate AND @endDate is null or b.[Tgl Post Real]<= @endDate)
+    AND ((@startDate is null or b.[Tgl Post Real] >= @startDate) AND(@endDate is null or b.[Tgl Post Real]<= @endDate))
     GROUP BY e.category `
 };
 
