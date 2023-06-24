@@ -5,7 +5,8 @@ const router = Router();
 
 const {
   getKolOverview, getSlotUsagePerYear, getMonthlyPostOverview,
-  getTotalViewsByYearAndManager, getPostReminder, getTotalViewsPerCategory
+  getTotalViewsByYearAndManager, getPostReminder, getTotalViewsPerCategory,
+  getFypByManager
 } = require('../service/MarketingDashboardService');
 
 const baseRoutes = '/marketing/dashboard/';
@@ -67,6 +68,17 @@ router.get(`${baseRoutes}views-per-category`, async (req, res) => {
   const result = await
   getTotalViewsPerCategory(managerIdForQuery, startDateForQuery, endDateForQuery);
   console.log(`routes:/${baseRoutes}views-per-category`);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.get(`${baseRoutes}fyp-overview`, async (req, res) => {
+  const { query: { managerId = null, startDate = null, endDate = null } } = req;
+  const managerIdForQuery = managerId === 'ALL' ? null : managerId;
+
+  const result = await getFypByManager(managerIdForQuery, new Date(startDate), new Date(endDate));
+  console.log(`routes:/${baseRoutes}fyp-overview`);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

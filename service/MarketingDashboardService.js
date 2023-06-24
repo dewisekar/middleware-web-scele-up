@@ -160,11 +160,53 @@ const getTotalViewsPerCategory = async (managerId, startDate, endDate) => {
   }
 };
 
+const _convertToMonthYearLabel = (yearMonthString) => {
+  const [year, month] = yearMonthString.split('-');
+  const convertedMonth = parseInt(month, 10) - 1;
+  return `${months[convertedMonth].value} ${year}`;
+};
+
+const getFypByManager = async (managerId, startDate, endDate) => {
+  try {
+    const pool = await poolPromise;
+    const startMonth = String(startDate.getMonth() + 1).padStart(2, '0');
+    const startYear = startDate.getFullYear();
+    const convertedStart = `${startYear}-${startMonth}`;
+    const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+    const endYear = endDate.getFullYear();
+    const convertedEnd = `${endYear}-${endMonth}`;
+    const { recordset } = await pool.request()
+      .input('startDate', convertedStart)
+      .input('endDate', convertedEnd)
+      .input('managerId', managerId)
+      .query(DASHBOARD_QUERIES.GET_FYP_PER_MONTH);
+
+    const fyp = [];
+    const monthLabel = [];
+    recordset.forEach((item) => {
+      const { totalFyp, yearMonth } = item;
+      const monthString = _convertToMonthYearLabel(yearMonth);
+      fyp.push(totalFyp);
+      monthLabel.push(monthString);
+    });
+
+    return {
+      status: true,
+      message: { totalViews: fyp, month: monthLabel }
+    };
+  } catch (error) {
+    console.log(`error ${moduleName}-getMonthlyPostOverview:`, error);
+
+    return { status: false, error: error.response.status };
+  }
+};
+
 module.exports = {
   getKolOverview,
   getSlotUsagePerYear,
   getMonthlyPostOverview,
   getTotalViewsByYearAndManager,
   getPostReminder,
-  getTotalViewsPerCategory
+  getTotalViewsPerCategory,
+  getFypByManager
 };

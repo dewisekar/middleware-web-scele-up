@@ -31,7 +31,16 @@ const DASHBOARD_QUERIES = {
     JOIN MARKETING.dbo.KolCategory e on e.id = d.[Kategori Kol] 
     WHERE a.dayNumber = 7 AND (@managerId is null or b.[Manager Id] = @managerId)
     AND ((@startDate is null or b.[Tgl Post Real] >= @startDate) AND(@endDate is null or b.[Tgl Post Real]<= @endDate))
-    GROUP BY e.category `
+    GROUP BY e.category `,
+  GET_FYP_PER_MONTH: `SELECT COUNT(a.isFyp) as totalFyp,
+    CAST(YEAR(a.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(a.[Tgl Post Real]) AS VARCHAR(2)), 2) as yearMonth
+    FROM MARKETING.dbo.post a
+    WHERE a.isFyp = 2 
+    AND CAST(YEAR(a.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(a.[Tgl Post Real]) AS VARCHAR(2)), 2) >= @startDate
+    AND CAST(YEAR(a.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(a.[Tgl Post Real]) AS VARCHAR(2)), 2) <= @endDate
+    AND (@managerId is null or a.[Manager Id] = @managerId)
+    GROUP BY CAST(YEAR(a.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(a.[Tgl Post Real]) AS VARCHAR(2)), 2)
+    ORDER BY CAST(YEAR(a.[Tgl Post Real]) AS VARCHAR(4))+'-'+right('00' + CAST(MONTH(a.[Tgl Post Real]) AS VARCHAR(2)), 2) ASC`
 };
 
 module.exports = { DASHBOARD_QUERIES };
