@@ -1,7 +1,7 @@
 const express = require('express');
 
 const app = express();
-const port = 5002;
+const port = 5000;
 const cron = require('node-cron');
 const cors = require('cors');
 const routes = require('./routes');
@@ -29,7 +29,7 @@ const {
 } = require('./service/Marketing');
 const {
   getVideoAndUserStatistic, getUserCpmByCost,
-  fetchKolListing
+  fetchKolListing, approveListing: approveTiktokListing
 } = require('./service/TiktokService');
 const { upload } = require('./utility/multer');
 
@@ -217,6 +217,15 @@ app.post('/tiktok/get-listing', async (req, res) => {
 app.get('/tiktok/fetch-listing', async (req, res) => {
   const result = await fetchKolListing();
   console.log('routes: POST /kol/fetch-listing');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+app.patch('/tiktok/listing/:id', async (req, res) => {
+  const { params: { id }, body } = req;
+  const result = await approveTiktokListing(id, body);
+  console.log('routes: PATCH /tiktok/listing/id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);

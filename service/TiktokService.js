@@ -188,6 +188,7 @@ const getUserCpmByCost = async (username, costPerSlot) => {
       .input('minCpm', minCpm)
       .input('minViews', minViews)
       .input('maxViews', maxViews)
+      .input('status', 'PENDING')
       .query(TIKTOK_QUERIES.INSERT_KOL_LISTING);
 
     const data = {
@@ -203,7 +204,6 @@ const getUserCpmByCost = async (username, costPerSlot) => {
 
 const fetchKolListing = async () => {
   try {
-    console.log('kepanggil');
     const pool = await poolPromise;
     const result = await pool.request().query(TIKTOK_QUERIES.FETCH_KOL_LISTING);
     const { recordset } = result;
@@ -218,10 +218,33 @@ const fetchKolListing = async () => {
   }
 };
 
+const approveListing = async (id, payload) => {
+  const resp = { status: 'false' };
+  console.log('haloooo');
+  try {
+    const { status } = payload;
+    const pool = await poolPromise;
+    console.log('hal', id, payload);
+    const result = await pool
+      .request()
+      .input('id', id)
+      .input('status', status)
+      .query(TIKTOK_QUERIES.APPROVE_LISTING);
+    resp.status = 'true';
+    resp.message = result.recordset;
+
+    return resp;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   getUserInfoByUsername,
   parseShortTiktokUrl,
   getVideoAndUserStatistic,
   getUserCpmByCost,
-  fetchKolListing
+  fetchKolListing,
+  approveListing
 };
