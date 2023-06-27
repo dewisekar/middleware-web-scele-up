@@ -1108,8 +1108,8 @@ const updatePostStatisticScheduler = async () => {
     console.log('Amount:', postsToBeUpdated.length);
 
     const postsStatistics = [];
-    for (const post of postsToBeUpdated) {
-      const { postId, linkPost, dateDifference } = post;
+    for (const postItem of postsToBeUpdated) {
+      const { postId, linkPost, dateDifference } = postItem;
       const mappedInfo = { postId, linkPost, dateDifference };
       const emptyPost = {
         followers: 0,
@@ -1153,7 +1153,7 @@ const updatePostStatisticScheduler = async () => {
     }
 
     // eslint-disable-next-line no-return-await
-    postsStatistics.forEach(async (post) => await _insertPostStatistic(post));
+    postsStatistics.forEach(async (postItem) => await _insertPostStatistic(postItem));
 
     resp.status = 'true';
     resp.message = { ...recordset[0] };
