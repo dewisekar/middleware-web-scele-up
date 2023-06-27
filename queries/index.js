@@ -320,7 +320,11 @@ where a.[Kontrak Id] = @contractId`,
   UPDATE_KOL_CATEGORY: 'UPDATE MARKETING.dbo.KolCategory SET category=@category WHERE id=@id; ',
   DELETE_POST_VIEW: 'DELETE FROM MARKETING.dbo.Post_View where postId=@id',
   DELETE_POST: 'DELETE FROM MARKETING.dbo.Post where [Post Id]=@id',
-  DELETE_POST_VIEW_BY_ID: 'DELETE FROM MARKETING.dbo.Post_View WHERE id=@id'
+  DELETE_POST_VIEW_BY_ID: 'DELETE FROM MARKETING.dbo.Post_View WHERE id=@id',
+  INSERT_POST_STATISTIC: `INSERT INTO MARKETING.dbo.Post_View
+    (postId, followers, comments, likes, shares, views, dayNumber, createdAt)
+    VALUES(@postId, @followers, @comments, @likes, @shares, @views, @dayNumber, GETDATE())`,
+  CHECK_POST_STATS_EXIST: 'SELECT * FROM MARKETING.dbo.Post_View where postId = @postId and dayNumber = @dayNumber'
 };
 
 module.exports = { QUERIES };

@@ -1782,6 +1782,44 @@ const deletePostView = async (id) => {
   }
 };
 
+const addPostStatistic = async (payload) => {
+  const resp = { status: 'false' };
+  try {
+    const {
+      postId, followers, comments, likes, shares, views, dayNumber
+    } = payload;
+    const pool = await poolPromise;
+    const { recordset: isUsed } = await pool
+      .request()
+      .input('postId', postId)
+      .input('dayNumber', dayNumber)
+      .query(QUERIES.CHECK_POST_STATS_EXIST);
+
+    if (isUsed.length !== 0) {
+      return { status: 'false', message: 'Data pada hari itu sudah ada!' };
+    }
+
+    await pool
+      .request()
+      .input('postId', postId)
+      .input('dayNumber', dayNumber)
+      .input('followers', followers)
+      .input('comments', comments)
+      .input('likes', likes)
+      .input('shares', shares)
+      .input('views', views)
+      .query(QUERIES.INSERT_POST_STATISTIC);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menambahkan post statistik';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    return resp;
+  }
+};
+
 const deleteContract = async (id) => {
   const resp = { status: 'false' };
   try {
@@ -1868,5 +1906,6 @@ module.exports = {
   deleteManager,
   deletePost,
   deleteContract,
-  deletePostView
+  deletePostView,
+  addPostStatistic
 };

@@ -48,7 +48,8 @@ const {
   deleteManager,
   deletePost,
   deleteContract,
-  deletePostView
+  deletePostView,
+  addPostStatistic
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -288,6 +289,14 @@ router.patch('/updatePost', async (req, res) => {
   const result = await updatePostById(id, body);
   console.log('routes:/updatePost');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.query);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.post('/post-statistic', async (req, res) => {
+  const result = await addPostStatistic(req.body);
+  console.log('routes:/post-statistic');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);
 });
