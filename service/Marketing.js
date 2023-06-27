@@ -1762,6 +1762,26 @@ const deletePost = async (id) => {
   }
 };
 
+const deletePostView = async (id) => {
+  const resp = { status: 'false' };
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input('id', id)
+      .query(QUERIES.DELETE_POST_VIEW_BY_ID);
+
+    resp.status = 'true';
+    resp.message = 'Berhasil menghapus statistik post';
+
+    return resp;
+  } catch (err) {
+    console.error(err);
+    resp.message = 'Error dalam proses hapus statistik post';
+    return resp;
+  }
+};
+
 const deleteContract = async (id) => {
   const resp = { status: 'false' };
   try {
@@ -1847,5 +1867,6 @@ module.exports = {
   updateManager,
   deleteManager,
   deletePost,
-  deleteContract
+  deleteContract,
+  deletePostView
 };

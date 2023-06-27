@@ -319,7 +319,8 @@ where a.[Kontrak Id] = @contractId`,
   INSERT_KOL_CATEGORY: 'INSERT INTO MARKETING.dbo.KolCategory (category, createdAt) VALUES(@category, GETDATE())',
   UPDATE_KOL_CATEGORY: 'UPDATE MARKETING.dbo.KolCategory SET category=@category WHERE id=@id; ',
   DELETE_POST_VIEW: 'DELETE FROM MARKETING.dbo.Post_View where postId=@id',
-  DELETE_POST: 'DELETE FROM MARKETING.dbo.Post where [Post Id]=@id'
+  DELETE_POST: 'DELETE FROM MARKETING.dbo.Post where [Post Id]=@id',
+  DELETE_POST_VIEW_BY_ID: 'DELETE FROM MARKETING.dbo.Post_View WHERE id=@id'
 };
 
 module.exports = { QUERIES };

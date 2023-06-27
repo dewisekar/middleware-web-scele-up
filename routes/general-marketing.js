@@ -47,7 +47,8 @@ const {
   updateManager,
   deleteManager,
   deletePost,
-  deleteContract
+  deleteContract,
+  deletePostView
 } = require('../service/Marketing');
 
 router.post('/insertNewKOL', async (req, res) => {
@@ -435,6 +436,16 @@ router.delete('/post/:id', async (req, res) => {
 
   const result = await deletePost(id);
   console.log('routes:/post/:id');
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
+  console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
+  res.send(result);
+});
+
+router.delete('/post-view/:id', async (req, res) => {
+  const { params: { id } } = req;
+
+  const result = await deletePostView(id);
+  console.log('routes:/post-view/:id');
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- req:', req.body);
   console.log(Date().toString('YYYY-MM-DD HH:mm:ss'), '- res:', result);
   res.send(result);
