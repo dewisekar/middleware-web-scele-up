@@ -159,6 +159,7 @@ const getVideoAndUserStatistic = async (url) => {
     const username = regex[3];
 
     const video = await _getVideoStatisticFromTiktokPage(videoId, finalUrl);
+    await sleep(3000);
     const user = await _getUserStatistic(username);
 
     return {
