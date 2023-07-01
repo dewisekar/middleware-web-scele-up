@@ -73,14 +73,15 @@ const _getUserStatistic = async (username) => {
   const axiosResponse = await axios.request({
     method: 'GET',
     url: `https://www.tiktok.com/${username}`,
-    headers
+    headers,
+    timeout: 5000
   });
 
-  await sleep(8000);
+  // await sleep(8000);
   console.log('ini response user:', axiosResponse);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
-  // console.log('this is dom 82: ', page);
+  console.log('this is dom 82: ', page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { UserModule: { stats } } = JSON.parse(sigiState);
   const userStats = stats[username.split('@')[1]];
