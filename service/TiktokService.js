@@ -79,7 +79,7 @@ const _getUserStatistic = async (username) => {
   await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
-  console.log('this is dom: ', page);
+  console.log('this is dom 82: ', page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { UserModule: { stats } } = JSON.parse(sigiState);
   const userStats = stats[username.split('@')[1]];
@@ -99,7 +99,7 @@ const _getUserVideos = async (username, costPerSlot, totalPost = 10) => {
   await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
-  console.log('this is dom: ', page);
+  console.log('this is dom 102: ', page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { ItemModule } = JSON.parse(sigiState);
   const keys = Object.keys(ItemModule);
@@ -133,7 +133,7 @@ const _getVideoStatisticFromTiktokPage = async (videoId, url) => {
   await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
-  console.log('this is dom: ', page);
+  console.log('this is dom 136: ', page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { ItemModule } = JSON.parse(sigiState);
   const { stats } = ItemModule[videoId];
