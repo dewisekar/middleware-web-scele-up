@@ -15,6 +15,8 @@ const headers = {
   cookie: 'tt_webid_v2=BOB'
 };
 
+const sleep = async (time) => new Promise((resolve) => setTimeout(resolve, time));
+
 const parseShortTiktokUrl = async (url) => {
   const axiosResponse = await axios.request({
     method: 'GET',
@@ -74,6 +76,7 @@ const _getUserStatistic = async (username) => {
     headers
   });
 
+  await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
   console.log('this is dom: ', page);
@@ -93,6 +96,7 @@ const _getUserVideos = async (username, costPerSlot, totalPost = 10) => {
   let totalViews = 0;
   const totalPrice = costPerSlot * totalPost;
 
+  await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
   console.log('this is dom: ', page);
@@ -126,6 +130,7 @@ const _getVideoStatisticFromTiktokPage = async (videoId, url) => {
     url,
     headers
   });
+  await sleep(3000);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
   console.log('this is dom: ', page);
