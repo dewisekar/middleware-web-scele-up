@@ -76,7 +76,7 @@ const _getUserStatistic = async (username) => {
     headers
   });
 
-  await sleep(3000);
+  await sleep(8000);
   console.log('ini response user:', axiosResponse);
   const page = axiosResponse.data.toString();
   const dom = new JSDOM(page);
