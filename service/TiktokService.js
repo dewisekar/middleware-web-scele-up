@@ -70,26 +70,17 @@ const _getUserStatisticById = async (userId) => {
 };
 
 const _getUserStatistic = async (username) => {
-  let axiosResponse = await axios.request({
+  const axiosResponse = await axios.request({
     method: 'GET',
     url: `https://www.tiktok.com/${username}`,
-    headers,
-    timeout: 5000
+    headers
   });
 
-  // await sleep(8000);
-  console.log('ini response user 1:', axiosResponse);
-  let page = axiosResponse.data.toString();
-  let dom = new JSDOM(page);
-  axiosResponse = await axios.request({
-    method: 'GET',
-    url: `https://www.tiktok.com/${username}`,
-    headers,
-    timeout: 5000
-  });
-  console.log('ini response user 2:', axiosResponse);
-  page = axiosResponse.data.toString();
-  dom = new JSDOM(page);
+  await sleep(2000);
+  console.log('ini response user:', axiosResponse);
+  const page = axiosResponse.data.toString();
+  const dom = new JSDOM(page);
+
   console.log('this is dom 82: ', page);
   const sigiState = dom.window.document.querySelector('#SIGI_STATE').textContent;
   const { UserModule: { stats } } = JSON.parse(sigiState);
