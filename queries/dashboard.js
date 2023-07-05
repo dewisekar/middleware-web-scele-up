@@ -22,7 +22,7 @@ const DASHBOARD_QUERIES = {
     JOIN [MARKETING].dbo.[Brief Status] f WITH(NOLOCK) ON e.[Brief Id] = f.[Brief Id]
     JOIN MARKETING.dbo.[Kol Manager] g on g.[Manager Id] = a.[Manager Id] 
     WHERE [Tgl Post Sesuai Jadwal] = CAST(GETDATE() AS DATE) OR [Tgl Post Sesuai Jadwal] < CAST(GETDATE() AS DATE) AND [Tgl Post Real] IS NULL
-    AND (@managerId is null or b.[Manager Id] = @managerId) ORDER BY [Tgl Post Sesuai Jadwal] DESC`,
+    AND (@managerId is null or a.[Manager Id] = @managerId) ORDER BY [Tgl Post Sesuai Jadwal] DESC`,
   GET_TOTAL_VIEWS_PER_CATEGORY_ALL_TIME: `SELECT SUM(a.views) as totalViews, count(a.views) as totalUsage, e.category 
     FROM MARKETING.dbo.Post_View a
     JOIN MARKETING.dbo.Post b on b.[Post Id] = a.postId 
